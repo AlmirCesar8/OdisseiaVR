@@ -1,22 +1,20 @@
 using UnityEngine;
-using UnityEngine.UI; // Necessário para Button e RawImage
-using UnityEngine.SceneManagement; // [MODIFICADO] Necessário para LoadSceneAsync
+using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 using System.Collections.Generic;
-using System.Collections; // [NOVO] Necessário para Corrotinas (IEnumerator)
-using TMPro; // Necessário para TextMeshProUGUI
+using System.Collections;
+using TMPro;
 
-// --- ESTRUTURA DE DADOS DE RUNTIME (ESPECÍFICA DO LOBBY) ---
-// (Esta classe só existe dentro deste script, não precisa de [System.Serializable])
 public class LobbyDadosLocal
 {
     public string locationName;
-    public Texture mapTexture; // Usamos Texture pois é para RawImage
+    public Texture mapTexture; 
 }
 
 /// <summary>
-/// Gerencia a cena do Lobby (Menu Principal).
-/// Controla o carrossel de seleção de locais, toca a música de fundo
-/// e carrega a cena do Tour com o local selecionado.
+/// RESPONSABILIDADE: Gerenciar a cena do Lobby (Menu Principal) de forma reativa.
+/// Otimizado para o Meta Quest 2 para evitar picos de I/O ao alternar mapas
+/// e fornecer feedback visual contínuo durante a mudança assíncrona de cena.
 /// </summary>
 [RequireComponent(typeof(AudioSource))]
 public class LobbyManager : MonoBehaviour
@@ -25,222 +23,172 @@ public class LobbyManager : MonoBehaviour
     [Tooltip("Arraste aqui o arquivo JSON que contém os dados dos tours.")]
     public TextAsset tourDataJson;
 
-    [Header("Referências da UI (Arraste do Canvas)")]
-    [Tooltip("O componente de texto que exibe o nome do local (ex: 'Coliseu, Itália').")]
+    [Header("Referências da UI (Canvas XR)")]
     public TextMeshProUGUI locationNameText;
-    
-    // --- MUDANÇA PRINCIPAL ---
-    [Tooltip("A RawImage que exibe a textura do mapa. Esta é a parte VISUAL.")]
-    public RawImage mapDisplayImage; // Campo 1: A Imagem
-
-    [Tooltip("O Botão (pode ser invisível) que detecta o clique. " +
-             "Deve ter o mesmo tamanho e posição da RawImage acima.")]
-    public Button mapStartButton; // Campo 2: O Botão
-    // --- FIM DA MUDANÇA ---
-
-    [Tooltip("Botão para ir para o próximo local.")]
+    public RawImage mapDisplayImage;
     public Button nextButton;
-    [Tooltip("Botão para ir para o local anterior.")]
     public Button previousButton;
+    public Button startTourButton;
+
+    [Header("Feedback de Carregamento VR")]
+    [Tooltip("Texto que avisa o utilizador que a cena está a ser carregada em background.")]
+    public TextMeshProUGUI loadingTextUI;
+    [Tooltip("Painel ou imagem de fade para escurecer o menu durante o loading.")]
+    public GameObject loadingPanel;
 
     [Header("Configurações de Cena")]
-    [Tooltip("O nome exato da sua cena principal do Tour (ex: 'TourScene').")]
-    public string tourSceneName = "TourScene"; 
+    public string tourSceneName = "TourScene";
 
-    [Header("Áudio")]
-    [Tooltip("A música de fundo que tocará no Lobby.")]
-    public AudioClip lobbyMusic;
-    [Tooltip("Volume da música do lobby (0 a 1).")]
-    [Range(0f, 1f)] public float musicVolume = 0.5f;
-
-    // --- Variáveis Privadas ---
-    private AudioSource audioSource;
-    private List<LobbyDadosLocal> locais = new List<LobbyDadosLocal>();
+    // --- ESTADO INTERNO ---
+    private List<LobbyDadosLocal> locaisNoLobby = new List<LobbyDadosLocal>();
     private int currentLocationIndex = 0;
-    
-    // [NOVO] Trava para impedir cliques duplos durante o carregamento
-    private bool isLoadingScene = false; 
+    private bool isLoadingScene = false;
 
-    void Start()
+    private void Awake()
     {
-        audioSource = GetComponent<AudioSource>();
-
-        if (lobbyMusic != null)
-        {
-            audioSource.clip = lobbyMusic;
-            audioSource.volume = musicVolume;
-            audioSource.loop = true;
-            audioSource.Play();
-        }
-
-        // --- VALIDAÇÃO ATUALIZADA ---
-        // Verificamos os dois novos campos separados
-        if (mapDisplayImage == null || mapStartButton == null || locationNameText == null || nextButton == null || previousButton == null)
-        {
-            Debug.LogError("Uma ou mais referências de UI (mapDisplayImage, mapStartButton, locationNameText, etc.) " +
-                           "não estão atribuídas no Inspector do LobbyManager!");
-            return;
-        }
+        if (loadingPanel != null) loadingPanel.SetActive(false);
+        if (loadingTextUI != null) loadingTextUI.gameObject.SetActive(false);
         
-        // --- LÓGICA DE AUTO-DETECÇÃO FOI REMOVIDA ---
-        // Agora confiamos 100% nas referências do Inspector.
+        ConfigurarBotoesIniciais();
+    }
 
-        LoadLobbyDataFromJSON();
-
-        // Adiciona os listeners para os cliques
-        nextButton.onClick.AddListener(NextLocation);
-        previousButton.onClick.AddListener(PreviousLocation);
-        mapStartButton.onClick.AddListener(StartTour); // O botão de start ouve o clique
-
-        if (locais.Count > 0)
+    private void Start()
+    {
+        if (tourDataJson != null)
         {
-            UpdateUI();
+            StartCoroutine(ParseJsonECarregarPrimeiroAsync());
         }
         else
         {
-            Debug.LogError("Nenhum local foi carregado do JSON. Verifique o arquivo.");
-            locationNameText.text = "Erro ao carregar dados";
+            Debug.LogError($"[{gameObject.name}] tourDataJson não foi atribuído no Lobby!");
         }
     }
 
-    /// <summary>
-    /// Lê o JSON e popula a lista 'locais' com nomes e Texturas.
-    /// (Esta função pode permanecer síncrona, pois Texturas de UI
-    /// carregadas do Resources são geralmente pequenas).
-    /// </summary>
-    void LoadLobbyDataFromJSON()
+    private void ConfigurarBotoesIniciais()
     {
-        if (tourDataJson == null)
-        {
-            Debug.LogError("ERRO CRÍTICO: O 'tourDataJson' não foi atribuído no Inspector!");
-            return;
-        }
+        if (nextButton != null) nextButton.onClick.AddListener(AvancarLocal);
+        if (previousButton != null) previousButton.onClick.AddListener(RetrocederLocal);
+        if (startTourButton != null) startTourButton.onClick.AddListener(IniciarTourSelecionado);
+    }
 
-        // Usa 'TourDataJson' (a classe global definida no TourManager.cs)
-        TourDataJson dataFromJson = JsonUtility.FromJson<TourDataJson>(tourDataJson.text);
+    /// <summary>
+    /// Lê a estrutura do JSON e faz o pré-carregamento assíncrono do primeiro elemento
+    /// para evitar travamentos de frame na inicialização do menu VR.
+    /// </summary>
+    private IEnumerator ParseJsonECarregarPrimeiroAsync()
+    {
+        SetInteratividadeInterface(false);
 
-        if (dataFromJson == null || dataFromJson.locais == null)
-        {
-            Debug.LogError("Falha ao desserializar o JSON. Verifique a estrutura do arquivo.");
-            return;
-        }
+        TourDataJson dadosJson = JsonUtility.FromJson<TourDataJson>(tourDataJson.text);
         
-        // Itera pelos locais lidos do JSON
-        foreach (var localJson in dataFromJson.locais)
+        foreach (var localJson in dadosJson.locais)
         {
             LobbyDadosLocal novoLocal = new LobbyDadosLocal
             {
-                locationName = localJson.locationName,
-                // Carrega a Textura da pasta 'Resources' usando o caminho do JSON
-                // (Ex: "TexturasMapas/Coliseu_Map")
-                mapTexture = Resources.Load<Texture>(localJson.mapImagePath) 
+                locationName = localJson.locationName
             };
 
-            // Aviso de erro se a textura não for encontrada
-            if (novoLocal.mapTexture == null && !string.IsNullOrEmpty(localJson.mapImagePath))
+            // Carrega a textura miniatura do mapa de forma assíncrona
+            if (!string.IsNullOrEmpty(localJson.mapImagePath))
             {
-                Debug.LogWarning($"Textura do mapa não encontrada em 'Assets/Resources/{localJson.mapImagePath}' para o local '{localJson.locationName}'");
+                ResourceRequest request = Resources.LoadAsync<Texture>(localJson.mapImagePath);
+                yield return request;
+                novoLocal.mapTexture = request.asset as Texture;
             }
-            
-            locais.Add(novoLocal);
+
+            locaisNoLobby.Add(novoLocal);
         }
+
+        SetInteratividadeInterface(true);
+        AtualizarDisplayInterface();
     }
 
-    /// <summary>
-    /// Atualiza o texto e a textura do carrossel com base no 'currentLocationIndex'.
-    /// </summary>
-    void UpdateUI()
+    private void AvancarLocal()
     {
-        if (locais.Count == 0) return;
+        if (locaisNoLobby.Count == 0 || isLoadingScene) return;
 
-        LobbyDadosLocal current = locais[currentLocationIndex];
-        
-        // Atualiza o texto
-        locationNameText.text = current.locationName;
-
-        // Atualiza a textura na RawImage (que agora é uma referência pública)
-        if (mapDisplayImage != null && current.mapTexture != null)
-        {
-            mapDisplayImage.texture = current.mapTexture;
-        }
+        currentLocationIndex = (currentLocationIndex + 1) % locaisNoLobby.Count;
+        AtualizarDisplayInterface();
     }
 
-    /// <summary>
-    /// Chamado pelo botão "Próxima".
-    /// </summary>
-    public void NextLocation()
+    private void RetrocederLocal()
     {
-        // [MODIFICADO] Impede a troca se já estiver carregando
-        if (isLoadingScene) return; 
-        
-        currentLocationIndex = (currentLocationIndex + 1) % locais.Count;
-        UpdateUI();
-    }
-
-    /// <summary>
-    /// Chamado pelo botão "Anterior".
-    /// </summary>
-    public void PreviousLocation()
-    {
-        // [MODIFICADO] Impede a troca se já estiver carregando
-        if (isLoadingScene) return; 
+        if (locaisNoLobby.Count == 0 || isLoadingScene) return;
 
         currentLocationIndex--;
         if (currentLocationIndex < 0)
         {
-            currentLocationIndex = locais.Count - 1;
+            currentLocationIndex = locaisNoLobby.Count - 1;
         }
-        UpdateUI();
+        AtualizarDisplayInterface();
     }
 
-    /// <summary>
-    /// Chamado pelo 'mapStartButton'.
-    /// [MODIFICADO] Agora inicia uma Corrotina.
-    /// </summary>
-    public void StartTour()
+    private void AtualizarDisplayInterface()
     {
-        // [MODIFICADO] Trava para impedir cliques duplos
+        if (currentLocationIndex < 0 || currentLocationIndex >= locaisNoLobby.Count) return;
+
+        LobbyDadosLocal localAtual = locaisNoLobby[currentLocationIndex];
+
+        if (locationNameText != null) locationNameText.text = localAtual.locationName;
+        if (mapDisplayImage != null)  mapDisplayImage.texture = localAtual.mapTexture;
+    }
+
+    private void SetInteratividadeInterface(bool estado)
+    {
+        if (nextButton != null) nextButton.interactable = estado;
+        if (previousButton != null) previousButton.interactable = estado;
+        if (startTourButton != null) startTourButton.interactable = estado;
+    }
+
+    public void IniciarTourSelecionado()
+    {
         if (isLoadingScene) return;
-        isLoadingScene = true;
-
-        // Desativa os botões para o usuário não clicar novamente
-        mapStartButton.interactable = false;
-        nextButton.interactable = false;
-        previousButton.interactable = false;
-        
-        // Inicia a rotina de carregamento assíncrono
-        StartCoroutine(LoadTourSceneAsync());
+        StartCoroutine(LoadTourSceneSequence());
     }
 
     /// <summary>
-    /// [NOVA CORROTINA]
-    /// Carrega a cena do Tour de forma assíncrona para não travar a thread principal.
+    /// Fluxo controlado de transição: Ativa mensagens de feedback para o utilizador VR,
+    /// desativa os inputs da UI para evitar cliques duplos e gerencia a memória antes da troca.
     /// </summary>
-    private IEnumerator LoadTourSceneAsync()
+    private IEnumerator LoadTourSceneSequence()
     {
-        // Usa o GameSettings (Singleton) para passar o índice para a próxima cena
+        isLoadingScene = true;
+        SetInteratividadeInterface(false);
+
+        // 1. Ativa imediatamente os feedbacks visuais na cara do utilizador
+        if (loadingPanel != null) loadingPanel.SetActive(true);
+        if (loadingTextUI != null)
+        {
+            loadingTextUI.text = $"A preparar portal para:\n{locaisNoLobby[currentLocationIndex].locationName}\nPor favor, aguarde...";
+            loadingTextUI.gameObject.SetActive(true);
+        }
+
+        // 2. Injeta o índice selecionado com segurança no Singleton persistente
         GameSettings settings = GameSettings.Instance;
         if (settings == null)
         {
-            Debug.LogWarning("GameSettings.Instance não encontrado. Criando um novo objeto GameSettings.");
             GameObject settingsObj = new GameObject("_GameSettings");
             settings = settingsObj.AddComponent<GameSettings>();
         }
-
         settings.selectedLocationIndex = currentLocationIndex;
-        
-        // 1. Inicia o carregamento assíncrono
+
+        // 3. Força a limpeza de assets do carrossel que não serão mais usados na próxima cena
+        locaisNoLobby.Clear();
+        Resources.UnloadUnusedAssets();
+
+        // 4. Dispara a operação assíncrona de carregamento da Unity
         AsyncOperation asyncLoad = SceneManager.LoadSceneAsync(tourSceneName);
 
-        // 2. Espera até que o carregamento da cena esteja completo
-        //    (A tela ficará preta durante essa transição, o que é normal)
+        // Mantém o loop atualizado com feedback até que a engine mude de cena por completo
         while (!asyncLoad.isDone)
         {
-            // (Opcional: você poderia exibir o asyncLoad.progress em uma UI de loading)
-            yield return null; // Espera pelo próximo frame
+            if (loadingTextUI != null)
+            {
+                // Opcional: Mostra a percentagem real do progresso de carregamento da cena
+                int progressoOtimizado = Mathf.RoundToInt(asyncLoad.progress * 100f);
+                loadingTextUI.text = $"A carregar portal para:\n{settings.selectedLocationIndex}\nProgresso: {progressoOtimizado}%";
+            }
+            yield return null;
         }
-        
-        // O 'isLoadingScene' não precisa ser resetado para 'false',
-        // pois este objeto será destruído (ou a cena será descarregada).
     }
 }

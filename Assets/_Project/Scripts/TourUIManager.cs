@@ -6,8 +6,8 @@ using TMPro;
 
 /// <summary>
 /// RESPONSABILIDADE: Controlar todos os elementos visuais (UI) da cena do Tour.
-/// (Textos, Botões, Cores de Feedback, Tela de Fade, Texto de Transição).
-/// Não sabe a lógica do jogo, apenas exibe o que o TourManager manda.
+/// Modificado para suportar feedbacks de carregamento preventivos (evitando telas pretas vazias em VR)
+/// e suavizar o cálculo de transição sob oscilações de taxa de quadros no Meta Quest 2.
 /// </summary>
 public class TourUIManager : MonoBehaviour
 {
@@ -24,7 +24,7 @@ public class TourUIManager : MonoBehaviour
     [Header("Referências da UI - Transição")]
     [Tooltip("Uma imagem preta (Image UI) para o fade.")]
     public Image fadeScreen;
-    [Tooltip("Texto que aparece SOBRE a tela preta indicando o próximo local.")]
+    [Tooltip("Texto que aparece SOBRE a tela preta indicando carregamentos ou próximos locais.")]
     public TextMeshProUGUI transitionTextUI; 
 
     [Header("Configurações de Feedback Visual")]
@@ -32,139 +32,120 @@ public class TourUIManager : MonoBehaviour
     public Color correctColor = new Color(0.1f, 0.7f, 0.2f);
     [Tooltip("Cor que o botão de resposta assume ao errar.")]
     public Color incorrectColor = new Color(0.8f, 0.2f, 0.1f);
-    [Tooltip("Cor padrão dos botões de resposta.")]
-    public Color normalColor = Color.white;
+    
+    // Cache de cores originais dos botões para evitar alocações em runtime
+    private Dictionary<Button, Color> originalButtonColors = new Dictionary<Button, Color>();
 
-    // Eventos
-    public event System.Action<int> OnAnswerButtonClicked;
-    public event System.Action OnMenuButtonClicked;
-
-    // Propriedade pública para o TourManager saber se pode pausar no fade
-    public bool HasFadeScreen => fadeScreen != null;
-
-    void Start()
+    private void Awake()
     {
-        // Configuração Inicial do Fade Screen
-        if (fadeScreen == null)
+        // Salva as cores originais dos botões para resetar posteriormente
+        foreach (Button btn in answerButtons)
         {
-            Debug.LogWarning("A 'Fade Screen' (Image) não foi atribuída no TourUIManager.");
-        }
-        else
-        {
-            // Garante que a tela comece PRETA e ATIVA
-            Color tempColor = fadeScreen.color;
-            tempColor.a = 1.0f; 
-            fadeScreen.color = tempColor;
-            fadeScreen.gameObject.SetActive(true);
-        }
-
-        // Garante que o texto de transição comece invisível
-        if (transitionTextUI != null)
-        {
-            transitionTextUI.gameObject.SetActive(false);
-            transitionTextUI.text = "";
-        }
-
-        InitializeButtonListeners();
-    }
-
-    private void InitializeButtonListeners()
-    {
-        for (int i = 0; i < answerButtons.Count; i++)
-        {
-            int index = i;
-            if (answerButtons[i] != null)
+            if (btn != null)
             {
-                answerButtons[i].onClick.AddListener(() => OnAnswerButtonClicked?.Invoke(index));
+                originalButtonColors[btn] = btn.image.color;
             }
         }
         
-        if (menuButton != null)
+        // Garante que a tela de fade comece ativa para não vazar frames sem carregamento
+        if (fadeScreen != null)
         {
-            menuButton.onClick.AddListener(() => OnMenuButtonClicked?.Invoke());
+            fadeScreen.gameObject.SetActive(true);
+            Color c = fadeScreen.color;
+            c.a = 1f;
+            fadeScreen.color = c;
         }
     }
 
-    public void ApresentarDesafio(Desafio desafio)
+    /// <summary>
+    /// Configura os textos do Quiz na UI e vincula os eventos de clique de forma limpa.
+    /// </summary>
+    public void SetupQuiz(string pergunta, List<string> respostas, TourManager manager)
     {
-        questionTextUI.text = desafio.questionText;
+        if (questionTextUI != null)
+        {
+            questionTextUI.text = pergunta;
+        }
 
         for (int i = 0; i < answerButtons.Count; i++)
         {
-            if (i < desafio.answers.Count)
+            if (answerButtons[i] == null) continue;
+
+            if (i < respostas.Count)
             {
                 answerButtons[i].gameObject.SetActive(true);
-                answerButtons[i].GetComponent<Image>().color = normalColor;
-                answerButtons[i].interactable = true;
+                
+                // Configura o texto interno do botão (TextMeshPro oculto no filho)
+                TextMeshProUGUI btnText = answerButtons[i].GetComponentInChildren<TextMeshProUGUI>();
+                if (btnText != null)
+                {
+                    btnText.text = respostas[i];
+                }
 
-                var tmproText = answerButtons[i].GetComponentInChildren<TextMeshProUGUI>();
-                if (tmproText != null)
-                    tmproText.text = desafio.answers[i];
+                // Limpa listeners antigos para não acumular chamadas em memória
+                answerButtons[i].onClick.RemoveAllListeners();
+                
+                int indexInvariante = i; // Evita problema de escopo de closure do C#
+                answerButtons[i].onClick.AddListener(() => manager.OnAnswerSelected(indexInvariante));
             }
             else
             {
+                // Esconde botões sobressalentes se a pergunta tiver menos opções
                 answerButtons[i].gameObject.SetActive(false);
             }
         }
-        
+
+        // Vincula o botão de menu de forma reativa
         if (menuButton != null)
         {
-            menuButton.gameObject.SetActive(true);
-            menuButton.interactable = true;
+            menuButton.onClick.RemoveAllListeners();
+            menuButton.onClick.AddListener(() => manager.RequestExitToLobby());
         }
     }
 
-    public void SetAllButtonsInteractable(bool isInteractable, int answerCount)
+    public void SetButtonsInteractable(bool interactable)
     {
-        for(int i = 0; i < answerCount; i++)
+        foreach (Button btn in answerButtons)
         {
-            if (i < answerButtons.Count && answerButtons[i] != null) 
-                answerButtons[i].interactable = isInteractable;
+            if (btn != null && btn.gameObject.activeSelf)
+            {
+                btn.interactable = interactable;
+            }
         }
-        
-        if (menuButton != null)
-            menuButton.interactable = isInteractable;
+        if (menuButton != null) menuButton.interactable = interactable;
     }
 
-    public void SetButtonFeedback(int buttonIndex, Color color)
+    public void ApplyButtonFeedback(int index, bool foiCorreto)
     {
-        if (buttonIndex < 0 || buttonIndex >= answerButtons.Count) return;
-        answerButtons[buttonIndex].GetComponent<Image>().color = color;
-    }
-
-    public void ResetButtonsToNormal(int answerCount)
-    {
-        for (int i = 0; i < answerCount; i++)
+        if (index >= 0 && index < answerButtons.Count && answerButtons[index] != null)
         {
-             if(i < answerButtons.Count && answerButtons[i].gameObject.activeInHierarchy) {
-                answerButtons[i].GetComponent<Image>().color = normalColor;
-                answerButtons[i].interactable = true;
-             }
+            answerButtons[index].image.color = foiCorreto ? correctColor : incorrectColor;
         }
-        
-        if (menuButton != null)
-            menuButton.interactable = true;
     }
 
-    // --- MÉTODOS DE TEXTO DE TRANSIÇÃO ---
+    public void ResetButtonColors()
+    {
+        foreach (Button btn in answerButtons)
+        {
+            if (btn != null && originalButtonColors.ContainsKey(btn))
+            {
+                btn.image.color = originalButtonColors[btn];
+            }
+        }
+    }
 
     /// <summary>
-    /// Exibe o texto indicando o próximo local. 
+    /// Exibe uma mensagem centralizada na tela de transição (ex: carregamentos ou nomes de mapas).
     /// </summary>
-    public void ShowTransitionText(string nextLocationName)
+    public void ShowTransitionText(string mensagem)
     {
         if (transitionTextUI != null)
         {
-            // AQUI ESTÁ A MUDANÇA DA FRASE
-            transitionTextUI.text = $"Você agora está sendo transportado para:\n\n<size=140%><color=#FFD700>{nextLocationName}</color></size>";
+            transitionTextUI.text = mensagem;
             transitionTextUI.gameObject.SetActive(true);
         }
     }
 
-    /// <summary>
-    /// Esconde o texto de transição.
-    /// Deve ser chamado antes do Fade In começar.
-    /// </summary>
     public void HideTransitionText()
     {
         if (transitionTextUI != null)
@@ -173,27 +154,34 @@ public class TourUIManager : MonoBehaviour
         }
     }
 
-    // --- CORROTINAS DE FADE ---
+    // --- CORROTINAS DE TRANSÇÃO VISUAL (FADES DE PRETO) ---
 
     public IEnumerator FadeOut(float fadeDuration)
     {
         if (fadeScreen == null) yield break;
 
-        Color currentColor = Color.black; // Baseado em preto
-        float startAlpha = fadeScreen.gameObject.activeInHierarchy ? fadeScreen.color.a : 0f;
+        fadeScreen.gameObject.SetActive(true);
+        Color currentColor = Color.black;
+        float startAlpha = fadeScreen.color.a;
         float targetAlpha = 1f;
         float timer = 0f;
 
-        fadeScreen.gameObject.SetActive(true);
+        if (fadeDuration <= 0f)
+        {
+            currentColor.a = targetAlpha;
+            fadeScreen.color = currentColor;
+            yield break;
+        }
 
         while (timer < fadeDuration)
         {
-            timer += Time.deltaTime;
+            timer += Time.unscaledDeltaTime; // Ignora flutuações de TimeScale durante travas de I/O
             float progress = Mathf.Clamp01(timer / fadeDuration);
             currentColor.a = Mathf.Lerp(startAlpha, targetAlpha, progress);
             fadeScreen.color = currentColor;
             yield return null;
         }
+        
         currentColor.a = targetAlpha;
         fadeScreen.color = currentColor;
     }
@@ -203,20 +191,27 @@ public class TourUIManager : MonoBehaviour
         if (fadeScreen == null) yield break;
 
         Color currentColor = Color.black;
-        float startAlpha = 1f;
+        float startAlpha = fadeScreen.color.a;
         float targetAlpha = 0f;
         float timer = 0f;
 
-        fadeScreen.gameObject.SetActive(true);
+        if (fadeDuration <= 0f)
+        {
+            currentColor.a = targetAlpha;
+            fadeScreen.color = currentColor;
+            fadeScreen.gameObject.SetActive(false);
+            yield break;
+        }
 
         while (timer < fadeDuration)
         {
-            timer += Time.deltaTime;
+            timer += Time.unscaledDeltaTime;
             float progress = Mathf.Clamp01(timer / fadeDuration);
             currentColor.a = Mathf.Lerp(startAlpha, targetAlpha, progress);
             fadeScreen.color = currentColor;
             yield return null;
         }
+        
         currentColor.a = targetAlpha;
         fadeScreen.color = currentColor;
         fadeScreen.gameObject.SetActive(false);

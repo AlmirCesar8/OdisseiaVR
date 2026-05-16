@@ -2,9 +2,7 @@ using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 
-// --- ESTRUTURAS DE DADOS PARA O RUNTIME (O QUE O JOGO USA) ---
-// (Movidas para cá, pois são a "saída" deste script)
-
+// --- ESTRUTURAS DE DADOS PARA O RUNTIME ---
 public class Desafio
 {
     public Material panoramaMaterial;
@@ -18,11 +16,10 @@ public class DadosLocal
 {
     public string locationName;
     public AudioClip backgroundMusic;
-    public List<Desafio> desafios;
+    public List<Desafio> desafios = new List<Desafio>();
 }
 
-// --- ESTRUTURAS DE DADOS PARA O JSON (O QUE O ARQUIVO CONTÉM) ---
-
+// --- ESTRUTURAS DE DADOS PARA O JSON ---
 [System.Serializable]
 public class DesafioJson
 {
@@ -48,10 +45,9 @@ public class TourDataJson
     public List<DadosLocalJson> locais;
 }
 
-
 /// <summary>
-/// RESPONSABILIDADE: Carregar todos os dados do JSON e assets (Materiais, Áudios)
-/// da pasta Resources de forma assíncrona.
+/// RESPONSABILIDADE: Carregar dados do JSON e gerenciar o ciclo de vida dos Assets em cache.
+/// Otimizado estritamente para evitar stuttering no Meta Quest 2 através de carregamento em lote.
 /// </summary>
 public class TourDataManager : MonoBehaviour
 {
@@ -59,77 +55,110 @@ public class TourDataManager : MonoBehaviour
     [Tooltip("Arraste aqui o arquivo JSON que contém os dados dos tours.")]
     public TextAsset tourDataJson;
 
-    // Propriedade pública para o TourManager acessar os dados carregados
     public List<DadosLocal> Locais { get; private set; } = new List<DadosLocal>();
+    public bool IsDataLoaded { get; private set; } = false;
+
+    private void Awake()
+    {
+        if (tourDataJson != null)
+        {
+            StartCoroutine(LoadAllDataAsync());
+        }
+        else
+        {
+            Debug.LogError($"[{gameObject.name}] tourDataJson não foi atribuído no Inspector!");
+        }
+    }
 
     /// <summary>
-    /// Corrotina principal que carrega todos os dados assincronamente.
-    /// O TourManager irá esperar por esta corrotina.
+    /// Corrotina otimizada: Dispara as requisições assíncronas em lote paralelo,
+    /// evitando gargalos frame-a-frame no hardware mobile do Quest 2.
     /// </summary>
-    public IEnumerator LoadTourDataFromJSONAsync()
+    private IEnumerator LoadAllDataAsync()
     {
-        if (tourDataJson == null)
+        TourDataJson dadosJson = JsonUtility.FromJson<TourDataJson>(tourDataJson.text);
+        Locais = new List<DadosLocal>(dadosJson.locais.Count);
+
+        foreach (var localJson in dadosJson.locais)
         {
-            Debug.LogError("ERRO CRÍTICO: O arquivo 'tourDataJson' não foi atribuído no TourDataManager!");
-            yield break; // Para a corrotina
-        }
+            DadosLocal novoLocal = new DadosLocal { locationName = localJson.locationName };
 
-        TourDataJson dataFromJson = JsonUtility.FromJson<TourDataJson>(tourDataJson.text);
-        Locais.Clear();
-
-        foreach (var localJson in dataFromJson.locais)
-        {
-            DadosLocal novoLocal = new DadosLocal
-            {
-                locationName = localJson.locationName,
-                desafios = new List<Desafio>()
-            };
-
-            // --- Carregamento Assíncrono do Áudio ---
+            // 1. Carregamento Assíncrono da Música de Fundo
             if (!string.IsNullOrEmpty(localJson.backgroundMusicPath))
             {
-                ResourceRequest audioRequest = Resources.LoadAsync<AudioClip>(localJson.backgroundMusicPath);
-                yield return audioRequest; // Espera o carregamento terminar
+                ResourceRequest musicRequest = Resources.LoadAsync<AudioClip>(localJson.backgroundMusicPath);
+                yield return musicRequest;
+                novoLocal.backgroundMusic = musicRequest.asset as AudioClip;
+            }
 
-                if (audioRequest.asset != null)
+            // 2. Preparação do lote de requisições de materiais para evitar stuttering
+            int numDesafios = localJson.desafios.Count;
+            ResourceRequest[] requestsLote = new ResourceRequest[numDesafios];
+            List<Desafio> desafiosPreparados = new List<Desafio>(numDesafios);
+
+            // Dispara todas as requisições de leitura de disco de forma paralela no background thread da Unity
+            for (int i = 0; i < numDesafios; i++)
+            {
+                var desJson = localJson.desafios[i];
+                if (!string.IsNullOrEmpty(desJson.panoramaMaterialPath))
                 {
-                    novoLocal.backgroundMusic = audioRequest.asset as AudioClip;
-                }
-                else
-                {
-                    Debug.LogWarning($"Asset de Áudio não encontrado em 'Resources/{localJson.backgroundMusicPath}' para o local '{novoLocal.locationName}'");
+                    requestsLote[i] = Resources.LoadAsync<Material>(desJson.panoramaMaterialPath);
                 }
             }
 
-            // --- Carregamento Assíncrono dos Desafios ---
-            foreach(var desafioJson in localJson.desafios)
+            // Aguarda o subsistema de I/O processar as texturas/materiais pesados de 360 graus
+            for (int i = 0; i < numDesafios; i++)
             {
+                if (requestsLote[i] != null)
+                {
+                    yield return requestsLote[i];
+                }
+            }
+
+            // Monta as instâncias de Runtime sem gerar sobrecarga sequencial
+            for (int i = 0; i < numDesafios; i++)
+            {
+                var desJson = localJson.desafios[i];
                 Desafio novoDesafio = new Desafio
                 {
-                    initialYRotation = desafioJson.initialYRotation,
-                    questionText = desafioJson.questionText,
-                    answers = desafioJson.answers,
-                    correctAnswerIndex = desafioJson.correctAnswerIndex
+                    initialYRotation = desJson.initialYRotation,
+                    questionText = desJson.questionText,
+                    answers = new List<string>(desJson.answers),
+                    correctAnswerIndex = desJson.correctAnswerIndex,
+                    panoramaMaterial = (requestsLote[i] != null) ? requestsLote[i].asset as Material : null
                 };
 
-                // --- Carregamento Assíncrono do Material ---
-                if (!string.IsNullOrEmpty(desafioJson.panoramaMaterialPath))
+                if (novoDesafio.panoramaMaterial == null && !string.IsNullOrEmpty(desJson.panoramaMaterialPath))
                 {
-                    ResourceRequest materialRequest = Resources.LoadAsync<Material>(desafioJson.panoramaMaterialPath);
-                    yield return materialRequest; // Espera o carregamento terminar
-
-                    if (materialRequest.asset != null)
-                    {
-                        novoDesafio.panoramaMaterial = materialRequest.asset as Material;
-                    }
-                    else
-                    {
-                        Debug.LogWarning($"Asset de Material não encontrado em 'Resources/{desafioJson.panoramaMaterialPath}' para o local '{novoLocal.locationName}'");
-                    }
+                    Debug.LogWarning($"[TourDataManager] Material inválido em: Resources/{desJson.panoramaMaterialPath}");
                 }
-                novoLocal.desafios.Add(novoDesafio);
+
+                desafiosPreparados.Add(novoDesafio);
             }
+
+            novoLocal.desafios.AddRange(desafiosPreparados);
             Locais.Add(novoLocal);
         }
+
+        IsDataLoaded = true;
+        Debug.Log("[TourDataManager] Carga de Assets em lote concluída com sucesso para Realidade Virtual.");
+    }
+
+    /// <summary>
+    /// Abordagem de gerenciamento de memória imperativa (Proativa para VR).
+    /// Deve ser chamada ao descarregar a cena para evitar vazamento de memória RAM/VRAM.
+    /// </summary>
+    public void LimparAssetsCarregados()
+    {
+        Locais.Clear();
+        IsDataLoaded = false;
+        // Força a Unity a liberar do chip gráfico texturas e materiais sem referência ativa
+        Resources.UnloadUnusedAssets();
+        System.GC.Collect();
+    }
+
+    private void OnDestroy()
+    {
+        LimparAssetsCarregados();
     }
 }

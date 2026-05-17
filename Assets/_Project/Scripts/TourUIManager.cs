@@ -33,6 +33,12 @@ public class TourUIManager : MonoBehaviour
     [Tooltip("Cor que o botão de resposta assume ao errar.")]
     public Color incorrectColor = new Color(0.8f, 0.2f, 0.1f);
     
+    [Header("Feedback de Carregamento VR")]
+    [Tooltip("Texto que avisa o utilizador que a cena está a ser carregada em background.")]
+    public TextMeshProUGUI loadingTextUI;
+    [Tooltip("Painel ou imagem de fade para escurecer o menu durante o loading.")]
+    public GameObject loadingPanel;
+
     // Cache de cores originais dos botões para evitar alocações em runtime
     private Dictionary<Button, Color> originalButtonColors = new Dictionary<Button, Color>();
 
@@ -156,64 +162,41 @@ public class TourUIManager : MonoBehaviour
 
     // --- CORROTINAS DE TRANSÇÃO VISUAL (FADES DE PRETO) ---
 
-    public IEnumerator FadeOut(float fadeDuration)
+    public IEnumerator FadeIn(float duration)
     {
-        if (fadeScreen == null) yield break;
-
-        fadeScreen.gameObject.SetActive(true);
-        Color currentColor = Color.black;
-        float startAlpha = fadeScreen.color.a;
-        float targetAlpha = 1f;
-        float timer = 0f;
-
-        if (fadeDuration <= 0f)
+        if (duration <= 0f)
         {
-            currentColor.a = targetAlpha;
-            fadeScreen.color = currentColor;
+            SetFadeAlpha(0f);
             yield break;
         }
 
-        while (timer < fadeDuration)
+        float elapsed = 0f;
+        while (elapsed < duration)
         {
-            timer += Time.unscaledDeltaTime; // Ignora flutuações de TimeScale durante travas de I/O
-            float progress = Mathf.Clamp01(timer / fadeDuration);
-            currentColor.a = Mathf.Lerp(startAlpha, targetAlpha, progress);
-            fadeScreen.color = currentColor;
+            elapsed += Time.unscaledDeltaTime; // Correção principal aplicada
+            float alpha = Mathf.Lerp(1f, 0f, elapsed / duration);
+            SetFadeAlpha(alpha);
             yield return null;
         }
-        
-        currentColor.a = targetAlpha;
-        fadeScreen.color = currentColor;
+        SetFadeAlpha(0f);
     }
 
-    public IEnumerator FadeIn(float fadeDuration)
+    public IEnumerator FadeOut(float duration)
     {
-        if (fadeScreen == null) yield break;
-
-        Color currentColor = Color.black;
-        float startAlpha = fadeScreen.color.a;
-        float targetAlpha = 0f;
-        float timer = 0f;
-
-        if (fadeDuration <= 0f)
+        if (duration <= 0f)
         {
-            currentColor.a = targetAlpha;
-            fadeScreen.color = currentColor;
-            fadeScreen.gameObject.SetActive(false);
+            SetFadeAlpha(1f);
             yield break;
         }
 
-        while (timer < fadeDuration)
+        float elapsed = 0f;
+        while (elapsed < duration)
         {
-            timer += Time.unscaledDeltaTime;
-            float progress = Mathf.Clamp01(timer / fadeDuration);
-            currentColor.a = Mathf.Lerp(startAlpha, targetAlpha, progress);
-            fadeScreen.color = currentColor;
+            elapsed += Time.unscaledDeltaTime; // Correção principal aplicada
+            float alpha = Mathf.Lerp(0f, 1f, elapsed / duration);
+            SetFadeAlpha(alpha);
             yield return null;
         }
-        
-        currentColor.a = targetAlpha;
-        fadeScreen.color = currentColor;
-        fadeScreen.gameObject.SetActive(false);
+        SetFadeAlpha(1f);
     }
 }

@@ -35,6 +35,8 @@ public class LobbyManager : MonoBehaviour
     public TextMeshProUGUI loadingTextUI;
     [Tooltip("Painel ou imagem de fade para escurecer o menu durante o loading.")]
     public GameObject loadingPanel;
+    [Tooltip("Barra de progresso visual (Slider UI) para o carregamento assíncrono.")]
+    public UnityEngine.UI.Slider progressBar;
 
     [Header("Configurações de Cena")]
     public string tourSceneName = "TourScene";
@@ -143,51 +145,60 @@ public class LobbyManager : MonoBehaviour
     public void IniciarTourSelecionado()
     {
         if (isLoadingScene) return;
-        StartCoroutine(LoadTourSceneSequence());
+        isLoadingScene = true; // Impede múltiplos cliques
+        SetInteratividadeInterface(false);
+        
+        // Agora chama a corrotina unificada que preenche a barra de progresso!
+        StartCoroutine(LoadTourSceneAsync());
     }
 
     /// <summary>
     /// Fluxo controlado de transição: Ativa mensagens de feedback para o utilizador VR,
     /// desativa os inputs da UI para evitar cliques duplos e gerencia a memória antes da troca.
     /// </summary>
-    private IEnumerator LoadTourSceneSequence()
+    private IEnumerator LoadTourSceneAsync()
     {
-        isLoadingScene = true;
-        SetInteratividadeInterface(false);
-
-        // 1. Ativa imediatamente os feedbacks visuais na cara do utilizador
-        if (loadingPanel != null) loadingPanel.SetActive(true);
-        if (loadingTextUI != null)
-        {
-            loadingTextUI.text = $"A preparar portal para:\n{locaisNoLobby[currentLocationIndex].locationName}\nPor favor, aguarde...";
-            loadingTextUI.gameObject.SetActive(true);
-        }
-
-        // 2. Injeta o índice selecionado com segurança no Singleton persistente
         GameSettings settings = GameSettings.Instance;
         if (settings == null)
         {
+            Debug.Warning("[LobbyManager] GameSettings não encontrado. Criando instância de emergência.");
             GameObject settingsObj = new GameObject("_GameSettings");
             settings = settingsObj.AddComponent<GameSettings>();
         }
+
         settings.selectedLocationIndex = currentLocationIndex;
+        
+        // Ativa o painel visual de carregamento no Canvas XR antes de iniciar o peso do I/O
+        if (loadingPanel != null) loadingPanel.SetActive(true);
+        if (progressBar != null) progressBar.value = 0f;
 
-        // 3. Força a limpeza de assets do carrossel que não serão mais usados na próxima cena
-        locaisNoLobby.Clear();
-        Resources.UnloadUnusedAssets();
-
-        // 4. Dispara a operação assíncrona de carregamento da Unity
         AsyncOperation asyncLoad = SceneManager.LoadSceneAsync(tourSceneName);
+        asyncLoad.allowSceneActivation = false; 
 
-        // Mantém o loop atualizado com feedback até que a engine mude de cena por completo
         while (!asyncLoad.isDone)
         {
+            // Mapeia o progresso da Unity (0 a 0.9) para escala real (0 a 1)
+            float progressoReal = Mathf.Clamp01(asyncLoad.progress / 0.9f);
+            
+            if (progressBar != null) 
+            {
+                progressBar.value = progressoReal;
+            }
+
             if (loadingTextUI != null)
             {
-                // Opcional: Mostra a percentagem real do progresso de carregamento da cena
-                int progressoOtimizado = Mathf.RoundToInt(asyncLoad.progress * 100f);
-                loadingTextUI.text = $"A carregar portal para:\n{settings.selectedLocationIndex}\nProgresso: {progressoOtimizado}%";
+                int percentagem = Mathf.RoundToInt(progressoReal * 100f);
+                loadingTextUI.text = $"A carregar portal para:\n{locaisNoLobby[currentLocationIndex].locationName}\nProgresso: {percentagem}%";
             }
+
+            // Quando o Quest 2 terminar de colocar a cena inteira na memória RAM
+            if (asyncLoad.progress >= 0.9f)
+            {
+                // Pequena folga de segurança para o usuário ler o texto de feedback em VR
+                yield return new WaitForSeconds(0.5f);
+                asyncLoad.allowSceneActivation = true;
+            }
+
             yield return null;
         }
     }

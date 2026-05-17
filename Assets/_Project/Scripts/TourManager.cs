@@ -2,21 +2,21 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using System.Collections;
 using System.Collections.Generic;
+using UnityEngine.XR.Interaction.Toolkit;
+using UnityEngine.Video;
+using TMPro;
 
-/// <summary>
-/// RESPONSABILIDADE: Orquestrar o fluxo do tour de forma reativa e segura.
-/// Modificado para respeitar a barreira de carregamento assíncrono do Meta Quest 2,
-/// evitando NullReferenceExceptions e garantindo a transição fluida de estados.
-/// </summary>
 [RequireComponent(typeof(AudioSource))]
 [RequireComponent(typeof(TourDataManager))]
-[RequireComponent(typeof(TourUIManager))] 
+[RequireComponent(typeof(TourUIManager))]
+[RequireComponent(typeof(VideoPlayer))]
 public class TourManager : MonoBehaviour
 {
     [Header("Componentes (Auto-detecta no Awake)")]
     [SerializeField] private TourDataManager dataManager;
     [SerializeField] private TourUIManager uiManager;
     [SerializeField] private AudioSource audioSource;
+    [SerializeField] private VideoPlayer videoPlayer;
     
     [Header("Referências da Cena")]
     [Tooltip("O objeto Renderer da esfera que exibirá o panorama 360°.")]
@@ -36,201 +36,303 @@ public class TourManager : MonoBehaviour
     [Tooltip("Fade LENTO e dramático ao trocar de MAPA.")]
     public float mapTransitionFadeDuration = 2.0f;
 
-    [Tooltip("Tempo extra na tela preta entre mapas para leitura ou amortecimento de I/O.")]
-    public float waitOnBlackScreenDelay = 1.5f;
+    [Tooltip("Tempo extra na tela preta entre mapas (para ler o texto descritivo).")]
+    public float waitOnBlackScreenDelay = 2.5f;
 
-    // --- CONTROLE DE ESTADO INTERNO ---
+    private int localAtualIndex = 0;
+    private int desafioAtualIndex = 0;
     private List<DadosLocal> locais;
-    private int currentLocationIndex = 0;
-    private int currentDesafioIndex = 0;
     private bool isProcessingAnswer = false;
 
     private void Awake()
     {
-        // Garante a auto-atribuição para diminuir erros de Inspector fora da engine
         if (dataManager == null) dataManager = GetComponent<TourDataManager>();
         if (uiManager == null) uiManager = GetComponent<TourUIManager>();
         if (audioSource == null) audioSource = GetComponent<AudioSource>();
-        
-        audioSource.loop = true;
-        audioSource.playOnAwake = false;
+        if (videoPlayer == null) videoPlayer = GetComponent<VideoPlayer>();
+
+        videoPlayer.playOnAwake = false;
+        videoPlayer.renderMode = VideoRenderMode.MaterialOverride;
+        videoPlayer.targetMaterialRenderer = panoramaSphereRenderer;
+        videoPlayer.targetMaterialProperty = "_MainTex";
+
+        videoPlayer.loopPointReached += OnVideoFinished;
     }
 
-    private void Start()
+    private void OnDestroy()
     {
-        // Bloqueia interações de botões iniciais de forma segura
-        uiManager.SetButtonsInteractable(false);
-        
-        // Inicia a rotina de inicialização via Barreira Assíncrona
-        StartCoroutine(InitializeTourSequence());
-    }
-
-    /// <summary>
-    /// Barreira Assíncrona: Espera até que o TourDataManager termine o processamento do lote 
-    /// de materiais no background thread antes de tentar ler os dados no Runtime.
-    /// </summary>
-    private IEnumerator InitializeTourSequence()
-    {
-        // 1. Garante que a tela comece totalmente preta para não quebrar a imersão VR
-        yield return StartCoroutine(uiManager.FadeOut(0f));
-
-        // [NOVO] Informa proativamente o usuário VR que os assets tridimensionais estão sendo carregados
-        uiManager.ShowTransitionText("Carregando Experiência VR...\nPor favor, aguarde.");
-
-        // 2. Aguarda o sinalizador de conclusão do carregamento assíncrono de assets
-        while (!dataManager.IsDataLoaded)
+        if (videoPlayer != null)
         {
-            yield return null; 
+            videoPlayer.loopPointReached -= OnVideoFinished;
+        }
+    }
+
+    private IEnumerator Start()
+    {
+        uiManager.SetButtonsInteractable(false);
+        yield return StartCoroutine(uiManager.FadeOut(0.0f));
+
+        while (dataManager == null || !dataManager.IsDataLoaded)
+        {
+            yield return null;
         }
 
         locais = dataManager.Locais;
 
-        // Verifica integridade dos dados injetados
-        if (locais == null || locais.Count == 0)
-        {
-            Debug.LogError("[TourManager] Erro Crítico: Nenhum dado de local foi carregado pelo TourDataManager.");
-            yield break;
-        }
-
         if (GameSettings.Instance != null)
         {
-            currentLocationIndex = GameSettings.Instance.selectedLocationIndex;
-            if (currentLocationIndex < 0 || currentLocationIndex >= locais.Count)
+            localAtualIndex = GameSettings.Instance.selectedLocationIndex;
+            if (localAtualIndex < 0 || localAtualIndex >= locais.Count)
             {
-                currentLocationIndex = 0;
+                localAtualIndex = 0;
             }
         }
         else
         {
-            currentLocationIndex = 0;
+            localAtualIndex = 0;
         }
 
-        currentDesafioIndex = 0;
-
-        // [NOVO] Altera temporariamente a mensagem para indicar que o mapa específico está abrindo antes do FadeIn
-        uiManager.ShowTransitionText($"Entrando em:\n{locais[currentLocationIndex].locationName}");
-        
-        CarregarDadosDoLocal(currentLocationIndex);
-        AtualizarDesafioAtual();
-
-        // Aguarda um breve instante para o usuário ler o nome do mapa de destino
-        yield return new WaitForSeconds(waitOnBlackScreenDelay);
-        
-        // Remove a mensagem de carregamento antes de revelar a imagem 360
-        uiManager.HideTransitionText();
+        desafioAtualIndex = 0;
+        CarregarDadosDoLocal(localAtualIndex);
 
         yield return StartCoroutine(uiManager.FadeIn(mapTransitionFadeDuration));
-        uiManager.SetButtonsInteractable(true);
     }
 
-    private void CarregarDadosDoLocal(int localIndex)
+    private void CarregarDesafioAtual()
     {
-        if (localIndex < 0 || localIndex >= locais.Count) return;
+        Desafio desafio = desafiosDoLocal[desafioAtualIndex];
 
-        DadosLocal localAtual = locais[localIndex];
-
-        // Aplica o clipe de áudio em cache com segurança de concorrência
-        if (localAtual.backgroundMusic != null)
+        if (desafio.IsVideo)
         {
-            audioSource.clip = localAtual.backgroundMusic;
+            ExecutarFluxoVideo(desafio);
+        }
+        else
+        {
+            // Se houver vídeo anterior tocando, limpa a memória gráfica dele imediatamente
+            if (videoPlayer.isPlaying || videoPlayer.clip != null)
+            {
+                videoPlayer.Stop();
+                videoPlayer.clip = null; 
+            }
+
+            panoramaSphereRenderer.sharedMaterial = desafio.panoramaMaterial;
+            // CORREÇÃO: Força a rotação correta definida no JSON também para imagens estáticas
+            panoramaSphereRenderer.transform.rotation = Quaternion.Euler(0, desafio.initialYRotation, 0);
+            
+            uiManager.ConfigurarPergunta(desafio.questionText, desafio.answers);
+        }
+    }
+
+    // --- SISTEMA DE ORQUESTRAÇÃO INTEGRADO (MANTENDO SEUS MÉTODOS) ---
+
+    private void InicializarDesafioAtual()
+    {
+        Desafio desafio = locais[localAtualIndex].desafios[desafioAtualIndex];
+
+        // Se o desafio ATUAL for uma imagem, limpamos o vídeo ANTES para liberar RAM/VRAM
+        if (!desafio.IsVideo)
+        {
+            if (videoPlayer != null)
+            {
+                videoPlayer.Stop();
+                videoPlayer.clip = null; // Corta a referência do asset para liberar o Garbage Collector
+            }
+        }
+
+        if (desafio.IsVideo)
+        {
+            ExecutarFluxoVideo(desafio);
+        }
+        else
+        {
+            ExecutarFluxoImagemQuiz(desafio);
+        }
+    }
+
+    private void ExecutarFluxoImagemQuiz(Desafio desafio)
+    {
+        // Certifica-se de que o player está completamente limpo e parado
+        if (videoPlayer.isPlaying)
+        {
+            videoPlayer.Stop();
+        }
+        videoPlayer.clip = null; // Garantia dupla de liberação de memória para o Quest
+
+        uiManager.questionTextUI.gameObject.SetActive(true);
+        
+        if (!audioSource.isPlaying && locais[localAtualIndex].backgroundMusic != null)
+        {
+            audioSource.clip = locais[localAtualIndex].backgroundMusic;
             audioSource.Play();
         }
-        else
+
+        if (desafio.panoramaMaterial != null)
         {
-            audioSource.Stop();
+            panoramaSphereRenderer.material = desafio.panoramaMaterial;
         }
+
+        panoramaSphereRenderer.transform.rotation = Quaternion.Euler(0, desafio.initialYRotation, 0);
+
+        ConfigurarDesafioAtual(desafio);
     }
 
-    private void AtualizarDesafioAtual()
+    private void ExecutarFluxoVideo(Desafio desafio)
     {
-        DadosLocal localAtual = locais[currentLocationIndex];
+        if (audioSource.isPlaying) audioSource.Stop();
+
+        uiManager.questionTextUI.gameObject.SetActive(false);
+        foreach (var botao in uiManager.answerButtons)
+        {
+            botao.gameObject.SetActive(false);
+        }
+
+        videoPlayer.clip = desafio.videoClip;
+        videoPlayer.audioOutputMode = VideoAudioOutputMode.AudioSource;
+        videoPlayer.SetTargetAudioSource(0, audioSource);
+
+        panoramaSphereRenderer.transform.rotation = Quaternion.Euler(0, desafio.initialYRotation, 0);
         
-        if (localAtual.desafios == null || localAtual.desafios.Count == 0)
-        {
-            Debug.LogError($"[TourManager] O local '{localAtual.locationName}' não possui desafios configurados.");
-            return;
-        }
-
-        Desafio desafioAtual = localAtual.desafios[currentDesafioIndex];
-
-        // Atualiza a projeção esférica 360 no Skybox/Sphere Material
-        if (desafioAtual.panoramaMaterial != null)
-        {
-            panoramaSphereRenderer.material = desafioAtual.panoramaMaterial;
-        }
-        else
-        {
-            Debug.LogWarning($"[TourManager] Desafio {currentDesafioIndex} sem material de panorama mapeado.");
-        }
-
-        // Aplica a rotação de compensação para calibração de visão inicial do Quest 2
-        panoramaSphereRenderer.transform.rotation = Quaternion.Euler(0, desafioAtual.initialYRotation, 0);
-
-        // Atualiza os dados puramente visuais na interface do canvas XR
-        uiManager.SetupQuiz(desafioAtual.questionText, desafioAtual.answers, this);
+        // Inicia o preparo nativo do Quest e delega para a Corrotina de espera segura
+        videoPlayer.Prepare();
+        StartCoroutine(AguardarEPlayVideo());
     }
 
-    /// <summary>
-    /// Ponto de entrada disparado de forma reativa pelo clique dos botões do TourUIManager.
-    /// </summary>
-    public void OnAnswerSelected(int indexSelecionado)
+    private IEnumerator AguardarEPlayVideo()
     {
-        if (isProcessingAnswer) return;
-        StartCoroutine(ProcessAnswerSequence(indexSelecionado));
+        // Bloqueia a execução frame a frame até que o buffer do vídeo no hardware esteja pronto
+        while (!videoPlayer.isPrepared)
+        {
+            yield return null;
+        }
+        
+        videoPlayer.Play();
     }
 
-    private IEnumerator ProcessAnswerSequence(int indexSelecionado)
+
+
+    private void ConfigurarDesafioAtual(Desafio desafio)
     {
-        isProcessingAnswer = true;
-        uiManager.SetButtonsInteractable(false);
+        uiManager.questionTextUI.text = desafio.questionText;
 
-        Desafio desafioAtual = locais[currentLocationIndex].desafios[currentDesafioIndex];
-        bool acertou = (indexSelecionado == desafioAtual.correctAnswerIndex);
-
-        // Aciona o feedback visual de cor no canvas
-        uiManager.ApplyButtonFeedback(indexSelecionado, acertou);
-
-        yield return new WaitForSeconds(feedbackDelay);
-
-        uiManager.ResetButtonColors();
-
-        if (acertou)
+        for (int i = 0; i < uiManager.answerButtons.Count; i++)
         {
-            // Avança para o próximo estado do Quiz
-            currentDesafioIndex++;
-
-            if (currentDesafioIndex < locais[currentLocationIndex].desafios.Count)
+            if (i < desafio.answers.Count)
             {
-                // Próxima pergunta dentro do MESMO mapa (Fade Rápido)
-                yield return StartCoroutine(TransitionToNextQuestion());
+                uiManager.answerButtons[i].gameObject.SetActive(true);
+                uiManager.ResetButtonColor(uiManager.answerButtons[i]);
+
+                TextMeshProUGUI btnText = uiManager.answerButtons[i].GetComponentInChildren<TextMeshProUGUI>();
+                if (btnText != null)
+                {
+                    btnText.text = desafio.answers[i];
+                }
             }
             else
             {
-                // Concluiu todos os desafios deste mapa, avança para o próximo Local (Fade Lento)
-                int proximoLocalIndex = currentLocationIndex + 1;
-
-                if (proximoLocalIndex < locais.Count)
-                {
-                    currentLocationIndex = proximoLocalIndex;
-                    currentDesafioIndex = 0;
-                    yield return StartCoroutine(TransitionToNextMap(currentLocationIndex));
-                }
-                else
-                {
-                    // Fim total da jornada do Tour, retorna ao menu principal
-                    yield return StartCoroutine(ReturnToLobby());
-                }
+                uiManager.answerButtons[i].gameObject.SetActive(false);
             }
         }
-        
+
         uiManager.SetButtonsInteractable(true);
         isProcessingAnswer = false;
+    }
+
+    public void CheckAnswer(int selectedIndex)
+    {
+        if (isProcessingAnswer) return;
+        isProcessingAnswer = true;
+
+        uiManager.SetButtonsInteractable(false);
+        Desafio desafio = locais[localAtualIndex].desafios[desafioAtualIndex];
+
+        if (selectedIndex == desafio.correctAnswerIndex)
+        {
+            StartCoroutine(HandleCorrectAnswer(selectedIndex));
+        }
+        else
+        {
+            StartCoroutine(HandleIncorrectAnswer(selectedIndex));
+        }
+    }
+
+    private IEnumerator HandleCorrectAnswer(int selectedIndex)
+    {
+        uiManager.ApplyButtonFeedback(uiManager.answerButtons[selectedIndex], true);
+        yield return new WaitForSeconds(feedbackDelay);
+
+        desafioAtualIndex++;
+
+        if (desafioAtualIndex < locais[localAtualIndex].desafios.Count)
+        {
+            StartCoroutine(TransitionToNextQuestion());
+        }
+        else
+        {
+            int proximoMapaIndex = localAtualIndex + 1;
+            if (proximoMapaIndex < locais.Count)
+            {
+                desafioAtualIndex = 0;
+                StartCoroutine(TransitionToNextMap(proximoMapaIndex));
+            }
+            else
+            {
+                StartCoroutine(ReturnToLobby());
+            }
+        }
+    }
+
+    private IEnumerator HandleIncorrectAnswer(int selectedIndex)
+    {
+        uiManager.ApplyButtonFeedback(uiManager.answerButtons[selectedIndex], false);
+        yield return new WaitForSeconds(feedbackDelay);
+
+        Desafio desafio = locais[localAtualIndex].desafios[desafioAtualIndex];
+        ConfigurarDesafioAtual(desafio);
+    }
+
+    private void OnVideoFinished(VideoPlayer source)
+    {
+        // BARREIRA DE SEGURANÇA: Valida se o índice está no escopo e se o desafio atual é realmente um vídeo
+        if (locais == null || localAtualIndex >= locais.Count || desafioAtualIndex >= locais[localAtualIndex].desafios.Count) return;
+        
+        Desafio desafioAtual = locais[localAtualIndex].desafios[desafioAtualIndex];
+        
+        // Se o vídeo disparar o evento por engano em background mas o nó atual não for vídeo, aborta o avanço
+        if (!desafioAtual.IsVideo)
+        {
+            Debug.LogWarning("[TourManager] loopPointReached disparado em background, mas o desafio atual não é um vídeo. Abortando avanço duplo.");
+            return;
+        }
+
+        // Limpa o clipe imediatamente ao encerrar a reprodução bem-sucedida
+        videoPlayer.Stop();
+        videoPlayer.clip = null;
+
+        desafioAtualIndex++;
+
+        if (desafioAtualIndex < locais[localAtualIndex].desafios.Count)
+        {
+            StartCoroutine(TransitionToNextQuestion());
+        }
+        else
+        {
+            int proximoMapaIndex = localAtualIndex + 1;
+            if (proximoMapaIndex < locais.Count)
+            {
+                desafioAtualIndex = 0;
+                StartCoroutine(TransitionToNextMap(proximoMapaIndex));
+            }
+            else
+            {
+                StartCoroutine(ReturnToLobby());
+            }
+        }
     }
 
     private IEnumerator TransitionToNextQuestion()
     {
         yield return StartCoroutine(uiManager.FadeOut(questionFadeDuration));
-        AtualizarDesafioAtual();
+        InicializarDesafioAtual();
         yield return StartCoroutine(uiManager.FadeIn(questionFadeDuration));
     }
 
@@ -245,8 +347,8 @@ public class TourManager : MonoBehaviour
 
         uiManager.HideTransitionText(); 
         
-        CarregarDadosDoLocal(nextMapIndex);
-        AtualizarDesafioAtual();
+        localAtualIndex = nextMapIndex;
+        CarregarDadosDoLocal(localAtualIndex);
 
         yield return StartCoroutine(uiManager.FadeIn(mapTransitionFadeDuration));
     }
@@ -260,26 +362,18 @@ public class TourManager : MonoBehaviour
     private IEnumerator ReturnToLobby()
     {
         uiManager.SetButtonsInteractable(false);
-        
-        // 1. Escurece a tela suavemente para manter o conforto visual em VR
         yield return StartCoroutine(uiManager.FadeOut(mapTransitionFadeDuration));
         
-        // 2. Para a música de fundo imediatamente
         audioSource.Stop();
-        
-        // [CORREÇÃO CRÍTICA]: Informa o usuário proativamente ANTES da engine travar a thread carregando a cena
         uiManager.ShowTransitionText("Retornando ao Menu Principal...\nPor favor, aguarde.");
 
-        // Corta qualquer frames residuais dando um respiro curto para a UI renderizar o texto acima
         yield return new WaitForSeconds(0.1f);
 
-        // 3. Aciona a limpeza proativa e imediata de memória RAM/VRAM que criamos no DataManager
         if (dataManager != null)
         {
             dataManager.LimparAssetsCarregados();
         }
 
-        // 4. Carrega a cena do Lobby de forma síncrona/direta (protegida pelo texto de transição)
         if (!string.IsNullOrEmpty(lobbySceneName))
         {
             SceneManager.LoadScene(lobbySceneName);

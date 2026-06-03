@@ -81,3 +81,7 @@ crashlytics-build.properties
 
 # 
 MuseuTeste3_BurstDebugInformation_DoNotShip/
+
+#Videos
+*.mp4
+*.mp4.meta

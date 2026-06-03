@@ -1,10 +1,12 @@
 using UnityEngine;
 
-/// <summary>
-/// Este é um script Singleton (Instância Única) que persiste entre as cenas.
-/// Sua única função é carregar dados de uma cena (Lobby) para outra (Tour).
-/// </summary>
-public class GameSettings : MonoBehaviour
+namespace OdisseiaVR.Core
+{
+    /// <summary>
+    /// Este é um script Singleton (Instância Única) que persiste entre as cenas.
+    /// Sua única função é carregar dados de uma cena (Lobby) para outra (Tour).
+    /// </summary>
+    public class GameSettings : MonoBehaviour
 {
     // A instância estática permite que outros scripts acessem este componente
     // de qualquer lugar usando "GameSettings.Instance".
@@ -34,4 +36,5 @@ public class GameSettings : MonoBehaviour
             Destroy(gameObject);
         }
     }
+}
 }

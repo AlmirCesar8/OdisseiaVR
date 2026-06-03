@@ -1,25 +1,28 @@
 using UnityEngine;
-using UnityEngine.UI; // Necessário para Button e RawImage
-using UnityEngine.SceneManagement; // [MODIFICADO] Necessário para LoadSceneAsync
+using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 using System.Collections.Generic;
-using System.Collections; // [NOVO] Necessário para Corrotinas (IEnumerator)
-using TMPro; // Necessário para TextMeshProUGUI
+using System.Collections;
+using TMPro;
+using OdisseiaVR.Core;
+using OdisseiaVR.Tour;
 
-// --- ESTRUTURA DE DADOS DE RUNTIME (ESPECÍFICA DO LOBBY) ---
-// (Esta classe só existe dentro deste script, não precisa de [System.Serializable])
-public class LobbyDadosLocal
+namespace OdisseiaVR.Lobby
+{
+    // --- ESTRUTURA DE DADOS DE RUNTIME (ESPECÍFICA DO LOBBY) ---
+    public class LobbyDadosLocal
 {
     public string locationName;
     public Texture mapTexture; // Usamos Texture pois é para RawImage
 }
 
 /// <summary>
-/// Gerencia a cena do Lobby (Menu Principal).
-/// Controla o carrossel de seleção de locais, toca a música de fundo
-/// e carrega a cena do Tour com o local selecionado.
-/// </summary>
-[RequireComponent(typeof(AudioSource))]
-public class LobbyManager : MonoBehaviour
+    /// Gerencia a cena do Lobby (Menu Principal).
+    /// Controla o carrossel de seleção de locais, toca a música de fundo
+    /// e carrega a cena do Tour com o local selecionado.
+    /// </summary>
+    [RequireComponent(typeof(AudioSource))]
+    public class LobbyManager : MonoBehaviour
 {
     [Header("Arquivo de Conteúdo")]
     [Tooltip("Arraste aqui o arquivo JSON que contém os dados dos tours.")]
@@ -45,7 +48,8 @@ public class LobbyManager : MonoBehaviour
 
     [Header("Configurações de Cena")]
     [Tooltip("O nome exato da sua cena principal do Tour (ex: 'TourScene').")]
-    public string tourSceneName = "TourScene"; 
+    public string tourSceneName = "TourScene";
+
 
     [Header("Áudio")]
     [Tooltip("A música de fundo que tocará no Lobby.")]
@@ -116,8 +120,17 @@ public class LobbyManager : MonoBehaviour
             return;
         }
 
-        // Usa 'TourDataJson' (a classe global definida no TourManager.cs)
-        TourDataJson dataFromJson = JsonUtility.FromJson<TourDataJson>(tourDataJson.text);
+        // Usa 'TourDataJson' (a classe global definida no TourDataManager.cs)
+        OdisseiaVR.Tour.TourDataJson dataFromJson;
+        try
+        {
+            dataFromJson = JsonUtility.FromJson<OdisseiaVR.Tour.TourDataJson>(tourDataJson.text);
+        }
+        catch (System.Exception ex)
+        {
+            Debug.LogError($"Falha ao desserializar o JSON: {ex.Message}");
+            return;
+        }
 
         if (dataFromJson == null || dataFromJson.locais == null)
         {
@@ -172,6 +185,7 @@ public class LobbyManager : MonoBehaviour
     {
         // [MODIFICADO] Impede a troca se já estiver carregando
         if (isLoadingScene) return; 
+        if (locais == null || locais.Count == 0) return; // Proteção contra divisão por zero
         
         currentLocationIndex = (currentLocationIndex + 1) % locais.Count;
         UpdateUI();
@@ -184,6 +198,7 @@ public class LobbyManager : MonoBehaviour
     {
         // [MODIFICADO] Impede a troca se já estiver carregando
         if (isLoadingScene) return; 
+        if (locais == null || locais.Count == 0) return; // Proteção caso não haja locais
 
         currentLocationIndex--;
         if (currentLocationIndex < 0)
@@ -228,7 +243,21 @@ public class LobbyManager : MonoBehaviour
         }
 
         settings.selectedLocationIndex = currentLocationIndex;
-        
+
+        // Garante um overlay persistente preto durante o carregamento para evitar flashes brancos
+        PersistentFade.EnsureExists();
+        PersistentFade.Instance.ShowImmediateOpaque();
+
+        // Mostra mensagem de transição sobre a tela preta (aparecerá durante o carregamento)
+        string nextName = null;
+        if (locais != null && currentLocationIndex >= 0 && currentLocationIndex < locais.Count)
+            nextName = locais[currentLocationIndex].locationName;
+        string message = $"Você agora está sendo transportado para:\n\n<size=140%><color=#FFD700>{nextName}</color></size>";
+        PersistentFade.Instance.SetMessage(message);
+
+        // Faz com que o PersistentFade dê fade-out automaticamente assim que a nova cena for carregada
+        PersistentFade.Instance.SetFadeOutOnNextSceneLoad(0.25f);
+
         // 1. Inicia o carregamento assíncrono
         AsyncOperation asyncLoad = SceneManager.LoadSceneAsync(tourSceneName);
 
@@ -243,4 +272,5 @@ public class LobbyManager : MonoBehaviour
         // O 'isLoadingScene' não precisa ser resetado para 'false',
         // pois este objeto será destruído (ou a cena será descarregada).
     }
+}
 }

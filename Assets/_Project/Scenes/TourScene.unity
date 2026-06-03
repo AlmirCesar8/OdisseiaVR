@@ -367,7 +367,11 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
+<<<<<<< Updated upstream:Assets/Scenes/TourScene.unity
   - {fileID: 2100000, guid: 6c514b7ca7628cc408de9c5088501e0f, type: 2}
+=======
+  - {fileID: 2100000, guid: a0de2245bccbe9e47adcf56a4e6fe762, type: 2}
+>>>>>>> Stashed changes:Assets/_Project/Scenes/TourScene.unity
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -447,7 +451,9 @@ MonoBehaviour:
   - {fileID: 1864422954}
   - {fileID: 1117184861}
   - {fileID: 961453641}
+  quizPanel: {fileID: 0}
   menuButton: {fileID: 868665921}
+  statusMessageUI: {fileID: 0}
   fadeScreen: {fileID: 697657310}
   transitionTextUI: {fileID: 1695532270}
   correctColor: {r: 0.1, g: 0.7, b: 0.2, a: 1}
@@ -1219,7 +1225,11 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: -90, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
+<<<<<<< Updated upstream:Assets/Scenes/TourScene.unity
   m_AnchoredPosition: {x: -5, y: 1}
+=======
+  m_AnchoredPosition: {x: 0, y: 2}
+>>>>>>> Stashed changes:Assets/_Project/Scenes/TourScene.unity
   m_SizeDelta: {x: 800, y: 400}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &625145172
@@ -1461,7 +1471,7 @@ MonoBehaviour:
   m_Transition: 1
   m_Colors:
     m_NormalColor: {r: 1, g: 1, b: 1, a: 1}
-    m_HighlightedColor: {r: 0.9607843, g: 0.9607843, b: 0.9607843, a: 1}
+    m_HighlightedColor: {r: 0.6, g: 0.6, b: 0.6, a: 1}
     m_PressedColor: {r: 0.78431374, g: 0.78431374, b: 0.78431374, a: 1}
     m_SelectedColor: {r: 0.9607843, g: 0.9607843, b: 0.9607843, a: 1}
     m_DisabledColor: {r: 0.78431374, g: 0.78431374, b: 0.78431374, a: 0.5019608}
@@ -1669,7 +1679,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 220, y: 0}
-  m_SizeDelta: {x: 200, y: 50}
+  m_SizeDelta: {x: 200, y: 65}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &961453641
 MonoBehaviour:
@@ -1693,7 +1703,7 @@ MonoBehaviour:
   m_Transition: 1
   m_Colors:
     m_NormalColor: {r: 1, g: 1, b: 1, a: 1}
-    m_HighlightedColor: {r: 0.9607843, g: 0.9607843, b: 0.9607843, a: 1}
+    m_HighlightedColor: {r: 0.6, g: 0.6, b: 0.6, a: 1}
     m_PressedColor: {r: 0.78431374, g: 0.78431374, b: 0.78431374, a: 1}
     m_SelectedColor: {r: 0.9607843, g: 0.9607843, b: 0.9607843, a: 1}
     m_DisabledColor: {r: 0.78431374, g: 0.78431374, b: 0.78431374, a: 0.5019608}
@@ -1790,7 +1800,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 200, y: 50}
+  m_SizeDelta: {x: 200, y: 65}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1117184861
 MonoBehaviour:
@@ -1814,7 +1824,7 @@ MonoBehaviour:
   m_Transition: 1
   m_Colors:
     m_NormalColor: {r: 1, g: 1, b: 1, a: 1}
-    m_HighlightedColor: {r: 0.9607843, g: 0.9607843, b: 0.9607843, a: 1}
+    m_HighlightedColor: {r: 0.6, g: 0.6, b: 0.6, a: 1}
     m_PressedColor: {r: 0.78431374, g: 0.78431374, b: 0.78431374, a: 1}
     m_SelectedColor: {r: 0.9607843, g: 0.9607843, b: 0.9607843, a: 1}
     m_DisabledColor: {r: 0.78431374, g: 0.78431374, b: 0.78431374, a: 0.5019608}
@@ -2937,7 +2947,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: -220, y: 0}
-  m_SizeDelta: {x: 200, y: 50}
+  m_SizeDelta: {x: 200, y: 65}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1864422954
 MonoBehaviour:
@@ -2961,7 +2971,7 @@ MonoBehaviour:
   m_Transition: 1
   m_Colors:
     m_NormalColor: {r: 1, g: 1, b: 1, a: 1}
-    m_HighlightedColor: {r: 0.9607843, g: 0.9607843, b: 0.9607843, a: 1}
+    m_HighlightedColor: {r: 0.6, g: 0.6, b: 0.6, a: 1}
     m_PressedColor: {r: 0.78431374, g: 0.78431374, b: 0.78431374, a: 1}
     m_SelectedColor: {r: 0.9607843, g: 0.9607843, b: 0.9607843, a: 1}
     m_DisabledColor: {r: 0.78431374, g: 0.78431374, b: 0.78431374, a: 0.5019608}
@@ -3581,8 +3591,9 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 2079185403}
-  - component: {fileID: 2079185404}
   - component: {fileID: 2079185405}
+  - component: {fileID: 2079185408}
+  - component: {fileID: 2079185404}
   - component: {fileID: 2079185407}
   - component: {fileID: 2079185406}
   m_Layer: 0
@@ -3621,6 +3632,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::InteractiveTourManager
   dataManager: {fileID: 70119903}
   uiManager: {fileID: 306692897}
+  videoPlayer: {fileID: 2079185408}
+  forceRenderTexture: 1
   panoramaSphereRenderer: {fileID: 306161662}
   lobbySceneName: LobbyScene
   feedbackDelay: 1.5
@@ -3746,7 +3759,9 @@ MonoBehaviour:
   - {fileID: 1864422954}
   - {fileID: 1117184861}
   - {fileID: 961453641}
+  quizPanel: {fileID: 625145170}
   menuButton: {fileID: 868665921}
+  statusMessageUI: {fileID: 0}
   fadeScreen: {fileID: 697657310}
   transitionTextUI: {fileID: 1695532270}
   correctColor: {r: 0.1, g: 0.7, b: 0.2, a: 1}
@@ -3765,6 +3780,42 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TourDataManager
   tourDataJson: {fileID: 4900000, guid: 64e996f4178403c489eb0896754e0ce3, type: 3}
+--- !u!328 &2079185408
+VideoPlayer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2079185402}
+  m_Enabled: 1
+  m_VideoClip: {fileID: 0}
+  m_TargetCameraAlpha: 1
+  m_TargetCamera3DLayout: 0
+  m_TargetCamera: {fileID: 0}
+  m_TargetTexture: {fileID: 0}
+  m_TimeReference: 0
+  m_TargetMaterialRenderer: {fileID: 306161662}
+  m_TargetMaterialProperty: 
+  m_RenderMode: 3
+  m_AspectRatio: 2
+  m_DataSource: 0
+  m_TimeUpdateMode: 2
+  m_PlaybackSpeed: 1
+  m_AudioOutputMode: 1
+  m_TargetAudioSources:
+  - {fileID: 2079185405}
+  m_DirectAudioVolumes:
+  - 1
+  m_Url: 
+  m_EnabledAudioTracks: 01
+  m_DirectAudioMutes: 00
+  m_ControlledAudioTrackCount: 1
+  m_PlayOnAwake: 1
+  m_SkipOnDrop: 1
+  m_Looping: 0
+  m_WaitForFirstFrame: 1
+  m_FrameReadyEventEnabled: 0
+  m_VideoShaders: []
 --- !u!1 &2130961566
 GameObject:
   m_ObjectHideFlags: 0

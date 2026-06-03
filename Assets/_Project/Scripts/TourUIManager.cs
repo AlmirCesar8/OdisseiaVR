@@ -3,23 +3,32 @@ using UnityEngine.UI;
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
+using OdisseiaVR.Tour;
 
-/// <summary>
-/// RESPONSABILIDADE: Controlar todos os elementos visuais (UI) da cena do Tour.
-/// (Textos, Botões, Cores de Feedback, Tela de Fade, Texto de Transição).
-/// Não sabe a lógica do jogo, apenas exibe o que o TourManager manda.
-/// </summary>
-public class TourUIManager : MonoBehaviour
+namespace OdisseiaVR.Tour
+{
+    /// <summary>
+    /// RESPONSABILIDADE: Controlar todos os elementos visuais (UI) da cena do Tour.
+    /// (Textos, Botões, Cores de Feedback, Tela de Fade, Texto de Transição).
+    /// Não sabe a lógica do jogo, apenas exibe o que o TourManager manda.
+    /// </summary>
+    public class TourUIManager : MonoBehaviour
 {
     [Header("Referências da UI - Quiz")]
     [Tooltip("O componente de texto para exibir a pergunta do quiz.")]
     public TextMeshProUGUI questionTextUI;
     [Tooltip("A lista de botões que servirão como opções de resposta.")]
     public List<Button> answerButtons;
+    [Tooltip("O painel que engloba a pergunta e botões do quiz (para esconder quando for vídeo).")]
+    public GameObject quizPanel;
     
     [Header("Referências da UI - Navegação")]
     [Tooltip("Botão para retornar ao Lobby (Menu).")]
     public Button menuButton;
+
+    [Header("Referências da UI - Mensagens de Status")]
+    [Tooltip("Texto para exibir mensagens de carregamento/status.")]
+    public TextMeshProUGUI statusMessageUI;
 
     [Header("Referências da UI - Transição")]
     [Tooltip("Uma imagem preta (Image UI) para o fade.")]
@@ -52,9 +61,7 @@ public class TourUIManager : MonoBehaviour
         else
         {
             // Garante que a tela comece PRETA e ATIVA
-            Color tempColor = fadeScreen.color;
-            tempColor.a = 1.0f; 
-            fadeScreen.color = tempColor;
+            fadeScreen.color = new Color(0f, 0f, 0f, 1f);
             fadeScreen.gameObject.SetActive(true);
         }
 
@@ -70,6 +77,8 @@ public class TourUIManager : MonoBehaviour
 
     private void InitializeButtonListeners()
     {
+        if (answerButtons == null) return;
+
         for (int i = 0; i < answerButtons.Count; i++)
         {
             int index = i;
@@ -87,31 +96,41 @@ public class TourUIManager : MonoBehaviour
 
     public void ApresentarDesafio(Desafio desafio)
     {
-        questionTextUI.text = desafio.questionText;
-
-        for (int i = 0; i < answerButtons.Count; i++)
+        if (desafio == null)
         {
-            if (i < desafio.answers.Count)
-            {
-                answerButtons[i].gameObject.SetActive(true);
-                answerButtons[i].GetComponent<Image>().color = normalColor;
-                answerButtons[i].interactable = true;
+            Debug.LogWarning("ApresentarDesafio recebeu null.");
+            return;
+        }
 
-                var tmproText = answerButtons[i].GetComponentInChildren<TextMeshProUGUI>();
-                if (tmproText != null)
-                    tmproText.text = desafio.answers[i];
-            }
-            else
+        if (questionTextUI != null)
+            questionTextUI.text = desafio.questionText ?? string.Empty;
+
+        if (answerButtons != null)
+        {
+            for (int i = 0; i < answerButtons.Count; i++)
             {
-                answerButtons[i].gameObject.SetActive(false);
+                if (i < (desafio.answers != null ? desafio.answers.Count : 0))
+                {
+                    if (answerButtons[i] != null)
+                    {
+                        answerButtons[i].gameObject.SetActive(true);
+                        Image btnImage = answerButtons[i].GetComponent<Image>();
+                        if (btnImage != null) btnImage.color = normalColor;
+                        answerButtons[i].interactable = true;
+
+                        var tmproText = answerButtons[i].GetComponentInChildren<TextMeshProUGUI>();
+                        if (tmproText != null)
+                            tmproText.text = desafio.answers[i];
+                    }
+                }
+                else
+                {
+                    if (answerButtons[i] != null)
+                        answerButtons[i].gameObject.SetActive(false);
+                }
             }
         }
         
-        if (menuButton != null)
-        {
-            menuButton.gameObject.SetActive(true);
-            menuButton.interactable = true;
-        }
     }
 
     public void SetAllButtonsInteractable(bool isInteractable, int answerCount)
@@ -129,21 +148,62 @@ public class TourUIManager : MonoBehaviour
     public void SetButtonFeedback(int buttonIndex, Color color)
     {
         if (buttonIndex < 0 || buttonIndex >= answerButtons.Count) return;
-        answerButtons[buttonIndex].GetComponent<Image>().color = color;
+        
+        Button targetButton = answerButtons[buttonIndex];
+        if (targetButton == null) return;
+        
+        Image buttonImage = targetButton.GetComponent<Image>();
+        if (buttonImage != null)
+            buttonImage.color = color;
     }
 
     public void ResetButtonsToNormal(int answerCount)
     {
+        if (answerButtons == null) return;
+
         for (int i = 0; i < answerCount; i++)
         {
-             if(i < answerButtons.Count && answerButtons[i].gameObject.activeInHierarchy) {
-                answerButtons[i].GetComponent<Image>().color = normalColor;
+             if (i < answerButtons.Count && answerButtons[i] != null && answerButtons[i].gameObject.activeInHierarchy) {
+                Image btnImage = answerButtons[i].GetComponent<Image>();
+                if (btnImage != null) btnImage.color = normalColor;
                 answerButtons[i].interactable = true;
              }
         }
         
         if (menuButton != null)
             menuButton.interactable = true;
+    }
+
+    public void ShowQuizPanel(bool show)
+    {
+        if (quizPanel != null)
+        {
+            quizPanel.SetActive(show);
+            if (menuButton != null)
+            {
+                menuButton.gameObject.SetActive(show);
+                menuButton.interactable = show;
+            }
+            return;
+        }
+
+        if (questionTextUI != null)
+            questionTextUI.gameObject.SetActive(show);
+
+        if (answerButtons != null)
+        {
+            for (int i = 0; i < answerButtons.Count; i++)
+            {
+                if (answerButtons[i] != null)
+                    answerButtons[i].gameObject.SetActive(show);
+            }
+        }
+
+        if (menuButton != null)
+        {
+            menuButton.gameObject.SetActive(show);
+            menuButton.interactable = show;
+        }
     }
 
     // --- MÉTODOS DE TEXTO DE TRANSIÇÃO ---
@@ -173,6 +233,24 @@ public class TourUIManager : MonoBehaviour
         }
     }
 
+    public void ShowStatusMessage(string message)
+    {
+        if (statusMessageUI != null)
+        {
+            statusMessageUI.text = message;
+            statusMessageUI.gameObject.SetActive(true);
+        }
+    }
+
+    public void HideStatusMessage()
+    {
+        if (statusMessageUI != null)
+        {
+            statusMessageUI.gameObject.SetActive(false);
+            statusMessageUI.text = "";
+        }
+    }
+
     // --- CORROTINAS DE FADE ---
 
     public IEnumerator FadeOut(float fadeDuration)
@@ -184,7 +262,13 @@ public class TourUIManager : MonoBehaviour
         float targetAlpha = 1f;
         float timer = 0f;
 
+        // Assegura que o Image seja preto (RGB) antes de ativar para evitar piscar branco
+        fadeScreen.color = new Color(0f, 0f, 0f, startAlpha);
         fadeScreen.gameObject.SetActive(true);
+        
+        // Garante que o fade screen fica em primeiro plano
+        if (fadeScreen.canvas != null)
+            fadeScreen.canvas.sortingOrder = 9999;
 
         while (timer < fadeDuration)
         {
@@ -207,7 +291,13 @@ public class TourUIManager : MonoBehaviour
         float targetAlpha = 0f;
         float timer = 0f;
 
+        // Assegura que o Image seja preto (RGB) antes de ativar para evitar piscar branco
+        fadeScreen.color = new Color(0f, 0f, 0f, startAlpha);
         fadeScreen.gameObject.SetActive(true);
+        
+        // Garante que o fade screen fica em primeiro plano enquanto fazendo fade in
+        if (fadeScreen.canvas != null)
+            fadeScreen.canvas.sortingOrder = 9999;
 
         while (timer < fadeDuration)
         {
@@ -220,5 +310,10 @@ public class TourUIManager : MonoBehaviour
         currentColor.a = targetAlpha;
         fadeScreen.color = currentColor;
         fadeScreen.gameObject.SetActive(false);
+        
+        // Restaura sorting order após fade completo
+        if (fadeScreen.canvas != null)
+            fadeScreen.canvas.sortingOrder = 0;
     }
+}
 }

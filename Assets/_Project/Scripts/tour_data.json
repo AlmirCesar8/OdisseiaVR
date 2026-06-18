@@ -6,6 +6,22 @@
     "mapImagePath": "UI/Mapas/mapa_cafe",
     "desafios": [
       {
+        "panoramaMasterialPath": "",
+        "videoPath": "Video/Video_Prefeito",
+        "initialYRotation": 0.0,
+        "questionText": "",
+        "answers": [],
+        "correctAnswerIndex": -1
+      },
+      {
+        "panoramaMaterialPath": "",
+        "videoPath": "Video/Video_cafeicultores",
+        "initialYRotation": 0.0,
+        "questionText": "",
+        "answers": [],
+        "correctAnswerIndex": -1
+      },
+      {
         "panoramaMaterialPath": "Materials/Cafe/Cafe001",
         "initialYRotation": 180 ,
         "questionText": "Qual organização liderou o projeto de conquista da IG para os cafeicultores locais?",

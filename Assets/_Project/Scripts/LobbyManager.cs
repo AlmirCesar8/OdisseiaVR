@@ -161,7 +161,7 @@ public class LobbyManager : MonoBehaviour
         GameSettings settings = GameSettings.Instance;
         if (settings == null)
         {
-            Debug.Warning("[LobbyManager] GameSettings não encontrado. Criando instância de emergência.");
+            Debug.LogWarning("[LobbyManager] GameSettings não encontrado. Criando instância de emergência.");
             GameObject settingsObj = new GameObject("_GameSettings");
             settings = settingsObj.AddComponent<GameSettings>();
         }

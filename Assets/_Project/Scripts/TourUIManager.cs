@@ -61,6 +61,12 @@ public class TourUIManager : MonoBehaviour
             c.a = 1f;
             fadeScreen.color = c;
         }
+
+        // Assegura que o texto de transição esteja escondido por padrão; só aparece entre mapas
+        if (transitionTextUI != null)
+        {
+            transitionTextUI.gameObject.SetActive(false);
+        }
     }
 
     /// <summary>
@@ -92,7 +98,7 @@ public class TourUIManager : MonoBehaviour
                 answerButtons[i].onClick.RemoveAllListeners();
                 
                 int indexInvariante = i; // Evita problema de escopo de closure do C#
-                answerButtons[i].onClick.AddListener(() => manager.OnAnswerSelected(indexInvariante));
+                answerButtons[i].onClick.AddListener(() => manager.CheckAnswer(indexInvariante));
             }
             else
             {
@@ -107,6 +113,9 @@ public class TourUIManager : MonoBehaviour
             menuButton.onClick.RemoveAllListeners();
             menuButton.onClick.AddListener(() => manager.RequestExitToLobby());
         }
+
+        // Garantir que o texto de transição não apareça durante perguntas/quiz
+        HideTransitionText();
     }
 
     public void SetButtonsInteractable(bool interactable)
@@ -198,5 +207,15 @@ public class TourUIManager : MonoBehaviour
             yield return null;
         }
         SetFadeAlpha(1f);
+    }
+
+    private void SetFadeAlpha(float alpha)
+    {
+        if (fadeScreen == null) return;
+        Color c = fadeScreen.color;
+        c.a = Mathf.Clamp01(alpha);
+        fadeScreen.color = c;
+        // ativa o objeto apenas quando houver opacidade para evitar blocos invisíveis na hierarquia
+        fadeScreen.gameObject.SetActive(c.a > 0f);
     }
 }

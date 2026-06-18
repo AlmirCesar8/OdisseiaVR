@@ -67,6 +67,15 @@ public class TourManager : MonoBehaviour
         }
     }
 
+    private void CarregarDadosDoLocal(int index)
+    {
+        if (locais == null || locais.Count == 0) return;
+        if (index < 0 || index >= locais.Count) index = 0;
+        localAtualIndex = index;
+        desafioAtualIndex = 0;
+        InicializarDesafioAtual();
+    }
+
     private IEnumerator Start()
     {
         uiManager.SetButtonsInteractable(false);
@@ -100,7 +109,7 @@ public class TourManager : MonoBehaviour
 
     private void CarregarDesafioAtual()
     {
-        Desafio desafio = desafiosDoLocal[desafioAtualIndex];
+        Desafio desafio = locais[localAtualIndex].desafios[desafioAtualIndex];
 
         if (desafio.IsVideo)
         {
@@ -119,7 +128,7 @@ public class TourManager : MonoBehaviour
             // CORREÇÃO: Força a rotação correta definida no JSON também para imagens estáticas
             panoramaSphereRenderer.transform.rotation = Quaternion.Euler(0, desafio.initialYRotation, 0);
             
-            uiManager.ConfigurarPergunta(desafio.questionText, desafio.answers);
+            uiManager.SetupQuiz(desafio.questionText, desafio.answers, this);
         }
     }
 
@@ -219,7 +228,7 @@ public class TourManager : MonoBehaviour
             if (i < desafio.answers.Count)
             {
                 uiManager.answerButtons[i].gameObject.SetActive(true);
-                uiManager.ResetButtonColor(uiManager.answerButtons[i]);
+                uiManager.ResetButtonColors();
 
                 TextMeshProUGUI btnText = uiManager.answerButtons[i].GetComponentInChildren<TextMeshProUGUI>();
                 if (btnText != null)
@@ -257,7 +266,7 @@ public class TourManager : MonoBehaviour
 
     private IEnumerator HandleCorrectAnswer(int selectedIndex)
     {
-        uiManager.ApplyButtonFeedback(uiManager.answerButtons[selectedIndex], true);
+        uiManager.ApplyButtonFeedback(selectedIndex, true);
         yield return new WaitForSeconds(feedbackDelay);
 
         desafioAtualIndex++;
@@ -283,7 +292,7 @@ public class TourManager : MonoBehaviour
 
     private IEnumerator HandleIncorrectAnswer(int selectedIndex)
     {
-        uiManager.ApplyButtonFeedback(uiManager.answerButtons[selectedIndex], false);
+        uiManager.ApplyButtonFeedback(selectedIndex, false);
         yield return new WaitForSeconds(feedbackDelay);
 
         Desafio desafio = locais[localAtualIndex].desafios[desafioAtualIndex];

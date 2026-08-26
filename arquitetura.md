@@ -1,234 +1,10 @@
 # File Tree: OdisseiaVR
 
-**Generated:** 16/05/2026, 14:58:49
-**Root Path:** `c:\Users\USER\OneDrive\Documentos\GitHub\OdisseiaVR`
+**Generated:** 6/23/2026, 1:12:23 PM
+**Root Path:** `c:\Users\Admin\Downloads\OdisseiaVR`
 
 ```
 ├── 📁 Assets
-│   ├── 📁 Fantasy Skybox FREE
-│   │   ├── 📁 Cubemaps
-│   │   │   ├── 📁 Classic
-│   │   │   │   ├── 📁 Materials
-│   │   │   │   │   ├── 📄 FS000_Night_02_Moonless.mat
-│   │   │   │   │   └── 📄 FS000_Night_02_Moonless.mat.meta
-│   │   │   │   ├── 📄 FS000_Day_01.mat
-│   │   │   │   ├── 📄 FS000_Day_01.mat.meta
-│   │   │   │   ├── 🖼️ FS000_Day_01.png
-│   │   │   │   ├── 📄 FS000_Day_01.png.meta
-│   │   │   │   ├── 📄 FS000_Day_01_Sunless.mat
-│   │   │   │   ├── 📄 FS000_Day_01_Sunless.mat.meta
-│   │   │   │   ├── 🖼️ FS000_Day_01_Sunless.png
-│   │   │   │   ├── 📄 FS000_Day_01_Sunless.png.meta
-│   │   │   │   ├── 📄 FS000_Day_02.mat
-│   │   │   │   ├── 📄 FS000_Day_02.mat.meta
-│   │   │   │   ├── 🖼️ FS000_Day_02.png
-│   │   │   │   ├── 📄 FS000_Day_02.png.meta
-│   │   │   │   ├── 📄 FS000_Day_02_Sunless.mat
-│   │   │   │   ├── 📄 FS000_Day_02_Sunless.mat.meta
-│   │   │   │   ├── 🖼️ FS000_Day_02_Sunless.png
-│   │   │   │   ├── 📄 FS000_Day_02_Sunless.png.meta
-│   │   │   │   ├── 📄 FS000_Day_03.mat
-│   │   │   │   ├── 📄 FS000_Day_03.mat.meta
-│   │   │   │   ├── 🖼️ FS000_Day_03.png
-│   │   │   │   ├── 📄 FS000_Day_03.png.meta
-│   │   │   │   ├── 📄 FS000_Day_03_Sunless.mat
-│   │   │   │   ├── 📄 FS000_Day_03_Sunless.mat.meta
-│   │   │   │   ├── 🖼️ FS000_Day_03_Sunless.png
-│   │   │   │   ├── 📄 FS000_Day_03_Sunless.png.meta
-│   │   │   │   ├── 📄 FS000_Day_04.mat
-│   │   │   │   ├── 📄 FS000_Day_04.mat.meta
-│   │   │   │   ├── 🖼️ FS000_Day_04.png
-│   │   │   │   ├── 📄 FS000_Day_04.png.meta
-│   │   │   │   ├── 📄 FS000_Day_04_Sunless.mat
-│   │   │   │   ├── 📄 FS000_Day_04_Sunless.mat.meta
-│   │   │   │   ├── 🖼️ FS000_Day_04_Sunless.png
-│   │   │   │   ├── 📄 FS000_Day_04_Sunless.png.meta
-│   │   │   │   ├── 📄 FS000_Day_05.mat
-│   │   │   │   ├── 📄 FS000_Day_05.mat.meta
-│   │   │   │   ├── 🖼️ FS000_Day_05.png
-│   │   │   │   ├── 📄 FS000_Day_05.png.meta
-│   │   │   │   ├── 📄 FS000_Day_05_Sunless.mat
-│   │   │   │   ├── 📄 FS000_Day_05_Sunless.mat.meta
-│   │   │   │   ├── 🖼️ FS000_Day_05_Sunless.png
-│   │   │   │   ├── 📄 FS000_Day_05_Sunless.png.meta
-│   │   │   │   ├── 📄 FS000_Day_06.mat
-│   │   │   │   ├── 📄 FS000_Day_06.mat.meta
-│   │   │   │   ├── 🖼️ FS000_Day_06.png
-│   │   │   │   ├── 📄 FS000_Day_06.png.meta
-│   │   │   │   ├── 📄 FS000_Day_06_Sunless.mat
-│   │   │   │   ├── 📄 FS000_Day_06_Sunless.mat.meta
-│   │   │   │   ├── 🖼️ FS000_Day_06_Sunless.png
-│   │   │   │   ├── 📄 FS000_Day_06_Sunless.png.meta
-│   │   │   │   ├── 📄 FS000_Night_01.mat
-│   │   │   │   ├── 📄 FS000_Night_01.mat.meta
-│   │   │   │   ├── 🖼️ FS000_Night_01.png
-│   │   │   │   ├── 📄 FS000_Night_01.png.meta
-│   │   │   │   ├── 📄 FS000_Night_01_Moonless.mat
-│   │   │   │   ├── 📄 FS000_Night_01_Moonless.mat.meta
-│   │   │   │   ├── 🖼️ FS000_Night_01_Moonless.png
-│   │   │   │   ├── 📄 FS000_Night_01_Moonless.png.meta
-│   │   │   │   ├── 📄 FS000_Night_02.mat
-│   │   │   │   ├── 📄 FS000_Night_02.mat.meta
-│   │   │   │   ├── 🖼️ FS000_Night_02.png
-│   │   │   │   ├── 📄 FS000_Night_02.png.meta
-│   │   │   │   ├── 📄 FS000_Night_02_Moonless.mat
-│   │   │   │   ├── 📄 FS000_Night_02_Moonless.mat.meta
-│   │   │   │   ├── 🖼️ FS000_Night_02_Moonless.png
-│   │   │   │   ├── 📄 FS000_Night_02_Moonless.png.meta
-│   │   │   │   ├── 📄 FS000_Night_03.mat
-│   │   │   │   ├── 📄 FS000_Night_03.mat.meta
-│   │   │   │   ├── 🖼️ FS000_Night_03.png
-│   │   │   │   ├── 📄 FS000_Night_03.png.meta
-│   │   │   │   ├── 📄 FS000_Night_03_Moonless.mat
-│   │   │   │   ├── 📄 FS000_Night_03_Moonless.mat.meta
-│   │   │   │   ├── 🖼️ FS000_Night_03_Moonless.png
-│   │   │   │   ├── 📄 FS000_Night_03_Moonless.png.meta
-│   │   │   │   └── 📄 Materials.meta
-│   │   │   └── 📄 Classic.meta
-│   │   ├── 📁 Panoramics
-│   │   │   ├── 📁 FS002
-│   │   │   │   ├── 📄 FS002_Day.mat
-│   │   │   │   ├── 📄 FS002_Day.mat.meta
-│   │   │   │   ├── 🖼️ FS002_Day.png
-│   │   │   │   ├── 📄 FS002_Day.png.meta
-│   │   │   │   ├── 📄 FS002_Day_Sunless.mat
-│   │   │   │   ├── 📄 FS002_Day_Sunless.mat.meta
-│   │   │   │   ├── 🖼️ FS002_Day_Sunless.png
-│   │   │   │   ├── 📄 FS002_Day_Sunless.png.meta
-│   │   │   │   ├── 📄 FS002_Night.mat
-│   │   │   │   ├── 📄 FS002_Night.mat.meta
-│   │   │   │   ├── 🖼️ FS002_Night.png
-│   │   │   │   ├── 📄 FS002_Night.png.meta
-│   │   │   │   ├── 📄 FS002_Night_Moonless.mat
-│   │   │   │   ├── 📄 FS002_Night_Moonless.mat.meta
-│   │   │   │   ├── 🖼️ FS002_Night_Moonless.png
-│   │   │   │   ├── 📄 FS002_Night_Moonless.png.meta
-│   │   │   │   ├── 📄 FS002_Rainy.mat
-│   │   │   │   ├── 📄 FS002_Rainy.mat.meta
-│   │   │   │   ├── 🖼️ FS002_Rainy.png
-│   │   │   │   ├── 📄 FS002_Rainy.png.meta
-│   │   │   │   ├── 📄 FS002_Snowy.mat
-│   │   │   │   ├── 📄 FS002_Snowy.mat.meta
-│   │   │   │   ├── 🖼️ FS002_Snowy.png
-│   │   │   │   ├── 📄 FS002_Snowy.png.meta
-│   │   │   │   ├── 📄 FS002_Sunrise.mat
-│   │   │   │   ├── 📄 FS002_Sunrise.mat.meta
-│   │   │   │   ├── 🖼️ FS002_Sunrise.png
-│   │   │   │   ├── 📄 FS002_Sunrise.png.meta
-│   │   │   │   ├── 📄 FS002_Sunset.mat
-│   │   │   │   ├── 📄 FS002_Sunset.mat.meta
-│   │   │   │   ├── 🖼️ FS002_Sunset.png
-│   │   │   │   └── 📄 FS002_Sunset.png.meta
-│   │   │   ├── 📁 FS003
-│   │   │   │   ├── 📄 FS003_Day.mat
-│   │   │   │   ├── 📄 FS003_Day.mat.meta
-│   │   │   │   ├── 🖼️ FS003_Day.png
-│   │   │   │   ├── 📄 FS003_Day.png.meta
-│   │   │   │   ├── 📄 FS003_Day_Sunless.mat
-│   │   │   │   ├── 📄 FS003_Day_Sunless.mat.meta
-│   │   │   │   ├── 🖼️ FS003_Day_Sunless.png
-│   │   │   │   ├── 📄 FS003_Day_Sunless.png.meta
-│   │   │   │   ├── 📄 FS003_Night.mat
-│   │   │   │   ├── 📄 FS003_Night.mat.meta
-│   │   │   │   ├── 🖼️ FS003_Night.png
-│   │   │   │   ├── 📄 FS003_Night.png.meta
-│   │   │   │   ├── 📄 FS003_Night_Moonless.mat
-│   │   │   │   ├── 📄 FS003_Night_Moonless.mat.meta
-│   │   │   │   ├── 🖼️ FS003_Night_Moonless.png
-│   │   │   │   ├── 📄 FS003_Night_Moonless.png.meta
-│   │   │   │   ├── 📄 FS003_Rainy.mat
-│   │   │   │   ├── 📄 FS003_Rainy.mat.meta
-│   │   │   │   ├── 🖼️ FS003_Rainy.png
-│   │   │   │   ├── 📄 FS003_Rainy.png.meta
-│   │   │   │   ├── 📄 FS003_Snowy.mat
-│   │   │   │   ├── 📄 FS003_Snowy.mat.meta
-│   │   │   │   ├── 🖼️ FS003_Snowy.png
-│   │   │   │   ├── 📄 FS003_Snowy.png.meta
-│   │   │   │   ├── 📄 FS003_Sunrise.mat
-│   │   │   │   ├── 📄 FS003_Sunrise.mat.meta
-│   │   │   │   ├── 🖼️ FS003_Sunrise.png
-│   │   │   │   ├── 📄 FS003_Sunrise.png.meta
-│   │   │   │   ├── 📄 FS003_Sunset.mat
-│   │   │   │   ├── 📄 FS003_Sunset.mat.meta
-│   │   │   │   ├── 🖼️ FS003_Sunset.png
-│   │   │   │   └── 📄 FS003_Sunset.png.meta
-│   │   │   ├── 📁 FS013
-│   │   │   │   ├── 📄 FS013_Day.mat
-│   │   │   │   ├── 📄 FS013_Day.mat.meta
-│   │   │   │   ├── 🖼️ FS013_Day.png
-│   │   │   │   ├── 📄 FS013_Day.png.meta
-│   │   │   │   ├── 📄 FS013_Day_Sunless.mat
-│   │   │   │   ├── 📄 FS013_Day_Sunless.mat.meta
-│   │   │   │   ├── 🖼️ FS013_Day_Sunless.png
-│   │   │   │   ├── 📄 FS013_Day_Sunless.png.meta
-│   │   │   │   ├── 📄 FS013_Night.mat
-│   │   │   │   ├── 📄 FS013_Night.mat.meta
-│   │   │   │   ├── 🖼️ FS013_Night.png
-│   │   │   │   ├── 📄 FS013_Night.png.meta
-│   │   │   │   ├── 📄 FS013_Night_Moonless.mat
-│   │   │   │   ├── 📄 FS013_Night_Moonless.mat.meta
-│   │   │   │   ├── 🖼️ FS013_Night_Moonless.png
-│   │   │   │   ├── 📄 FS013_Night_Moonless.png.meta
-│   │   │   │   ├── 📄 FS013_Rainy.mat
-│   │   │   │   ├── 📄 FS013_Rainy.mat.meta
-│   │   │   │   ├── 🖼️ FS013_Rainy.png
-│   │   │   │   ├── 📄 FS013_Rainy.png.meta
-│   │   │   │   ├── 📄 FS013_Snowy.mat
-│   │   │   │   ├── 📄 FS013_Snowy.mat.meta
-│   │   │   │   ├── 🖼️ FS013_Snowy.png
-│   │   │   │   ├── 📄 FS013_Snowy.png.meta
-│   │   │   │   ├── 📄 FS013_Sunrise.mat
-│   │   │   │   ├── 📄 FS013_Sunrise.mat.meta
-│   │   │   │   ├── 🖼️ FS013_Sunrise.png
-│   │   │   │   ├── 📄 FS013_Sunrise.png.meta
-│   │   │   │   ├── 📄 FS013_Sunset.mat
-│   │   │   │   ├── 📄 FS013_Sunset.mat.meta
-│   │   │   │   ├── 🖼️ FS013_Sunset.png
-│   │   │   │   └── 📄 FS013_Sunset.png.meta
-│   │   │   ├── 📁 FS017
-│   │   │   │   ├── 📄 FS017_Day.mat
-│   │   │   │   ├── 📄 FS017_Day.mat.meta
-│   │   │   │   ├── 🖼️ FS017_Day.png
-│   │   │   │   ├── 📄 FS017_Day.png.meta
-│   │   │   │   ├── 📄 FS017_Day_Sunless.mat
-│   │   │   │   ├── 📄 FS017_Day_Sunless.mat.meta
-│   │   │   │   ├── 🖼️ FS017_Day_Sunless.png
-│   │   │   │   ├── 📄 FS017_Day_Sunless.png.meta
-│   │   │   │   ├── 📄 FS017_Night.mat
-│   │   │   │   ├── 📄 FS017_Night.mat.meta
-│   │   │   │   ├── 🖼️ FS017_Night.png
-│   │   │   │   ├── 📄 FS017_Night.png.meta
-│   │   │   │   ├── 📄 FS017_Night_Moonless.mat
-│   │   │   │   ├── 📄 FS017_Night_Moonless.mat.meta
-│   │   │   │   ├── 🖼️ FS017_Night_Moonless.png
-│   │   │   │   ├── 📄 FS017_Night_Moonless.png.meta
-│   │   │   │   ├── 📄 FS017_Rainy.mat
-│   │   │   │   ├── 📄 FS017_Rainy.mat.meta
-│   │   │   │   ├── 🖼️ FS017_Rainy.png
-│   │   │   │   ├── 📄 FS017_Rainy.png.meta
-│   │   │   │   ├── 📄 FS017_Snowy.mat
-│   │   │   │   ├── 📄 FS017_Snowy.mat.meta
-│   │   │   │   ├── 🖼️ FS017_Snowy.png
-│   │   │   │   ├── 📄 FS017_Snowy.png.meta
-│   │   │   │   ├── 📄 FS017_Sunrise.mat
-│   │   │   │   ├── 📄 FS017_Sunrise.mat.meta
-│   │   │   │   ├── 🖼️ FS017_Sunrise.png
-│   │   │   │   ├── 📄 FS017_Sunrise.png.meta
-│   │   │   │   ├── 📄 FS017_Sunset.mat
-│   │   │   │   ├── 📄 FS017_Sunset.mat.meta
-│   │   │   │   ├── 🖼️ FS017_Sunset.png
-│   │   │   │   └── 📄 FS017_Sunset.png.meta
-│   │   │   ├── 📄 FS002.meta
-│   │   │   ├── 📄 FS003.meta
-│   │   │   ├── 📄 FS013.meta
-│   │   │   └── 📄 FS017.meta
-│   │   ├── 📄 Cubemaps.meta
-│   │   ├── 📄 Panoramics.meta
-│   │   ├── 📄 Readme.txt
-│   │   ├── 📄 Readme.txt.meta
-│   │   ├── 📄 ReleaseNotes.txt
-│   │   ├── 📄 ReleaseNotes.txt.meta
-│   │   └── 📄 Scenes.meta
 │   ├── 📁 Samples
 │   │   ├── 📁 XR Interaction Toolkit
 │   │   │   ├── 📁 3.0.8
@@ -1146,9 +922,6 @@
 │   │   │   │   └── 📄 vitoriamapa.mp3.meta
 │   │   │   ├── 📁 Materials
 │   │   │   │   ├── 📁 Acropole
-│   │   │   │   │   ├── 📁 Materials
-│   │   │   │   │   │   ├── 📄 Street View Acropole de Atenas.mat
-│   │   │   │   │   │   └── 📄 Street View Acropole de Atenas.mat.meta
 │   │   │   │   │   ├── 📄 Acropole01.mat
 │   │   │   │   │   ├── 📄 Acropole01.mat.meta
 │   │   │   │   │   ├── 📄 Acropole02.mat
@@ -1165,11 +938,6 @@
 │   │   │   │   │   ├── 📄 Acropole07.mat.meta
 │   │   │   │   │   ├── 📄 Acropole08.mat
 │   │   │   │   │   ├── 📄 Acropole08.mat.meta
-│   │   │   │   │   ├── 📄 Esfera 3.mat
-│   │   │   │   │   ├── 📄 Esfera 3.mat.meta
-│   │   │   │   │   ├── 📄 Esfera 4.mat
-│   │   │   │   │   ├── 📄 Esfera 4.mat.meta
-│   │   │   │   │   ├── 📄 Materials.meta
 │   │   │   │   │   ├── 🖼️ Street View Acropole de Atenas 2.jpg
 │   │   │   │   │   ├── 📄 Street View Acropole de Atenas 2.jpg.meta
 │   │   │   │   │   ├── 🖼️ Street View Acropole de Atenas 3.jpg
@@ -1188,35 +956,7 @@
 │   │   │   │   │   ├── 📄 Street View Teatro de Dionisio 4.jpg.meta
 │   │   │   │   │   ├── 🖼️ Street View Teatro de Dionisio.jpg
 │   │   │   │   │   └── 📄 Street View Teatro de Dionisio.jpg.meta
-│   │   │   │   ├── 📁 Cafe
-│   │   │   │   │   ├── 🖼️ Associacao.JPEG
-│   │   │   │   │   ├── 📄 Associacao.JPEG.meta
-│   │   │   │   │   ├── 📄 Cafe001.mat
-│   │   │   │   │   ├── 📄 Cafe001.mat.meta
-│   │   │   │   │   ├── 📄 Cafe002.mat
-│   │   │   │   │   ├── 📄 Cafe002.mat.meta
-│   │   │   │   │   ├── 📄 Cafe003.mat
-│   │   │   │   │   ├── 📄 Cafe003.mat.meta
-│   │   │   │   │   ├── 📄 Cafe004.mat
-│   │   │   │   │   ├── 📄 Cafe004.mat.meta
-│   │   │   │   │   ├── 📄 Cafe005.mat
-│   │   │   │   │   ├── 📄 Cafe005.mat.meta
-│   │   │   │   │   ├── 📄 Cafe006.mat
-│   │   │   │   │   ├── 📄 Cafe006.mat.meta
-│   │   │   │   │   ├── 🖼️ Cafezal.JPEG
-│   │   │   │   │   ├── 📄 Cafezal.JPEG.meta
-│   │   │   │   │   ├── 🖼️ Cristo_Redentor.JPEG
-│   │   │   │   │   ├── 📄 Cristo_Redentor.JPEG.meta
-│   │   │   │   │   ├── 🖼️ Igreja.JPEG
-│   │   │   │   │   ├── 📄 Igreja.JPEG.meta
-│   │   │   │   │   ├── 🖼️ Museu.JPEG
-│   │   │   │   │   ├── 📄 Museu.JPEG.meta
-│   │   │   │   │   ├── 🖼️ Secretaria.JPEG
-│   │   │   │   │   └── 📄 Secretaria.JPEG.meta
 │   │   │   │   ├── 📁 Coliseu
-│   │   │   │   │   ├── 📁 Materials
-│   │   │   │   │   │   ├── 📄 Street View Acropole de Atenas.mat
-│   │   │   │   │   │   └── 📄 Street View Acropole de Atenas.mat.meta
 │   │   │   │   │   ├── 📄 Coliseu01.mat
 │   │   │   │   │   ├── 📄 Coliseu01.mat.meta
 │   │   │   │   │   ├── 📄 Coliseu02.mat
@@ -1231,7 +971,6 @@
 │   │   │   │   │   ├── 📄 Coliseu06.mat.meta
 │   │   │   │   │   ├── 📄 Coliseu07.mat
 │   │   │   │   │   ├── 📄 Coliseu07.mat.meta
-│   │   │   │   │   ├── 📄 Materials.meta
 │   │   │   │   │   ├── 🖼️ coliseuOut.jpg
 │   │   │   │   │   ├── 📄 coliseuOut.jpg.meta
 │   │   │   │   │   ├── 🖼️ coliseuOutLonge.jpg
@@ -1246,15 +985,6 @@
 │   │   │   │   │   ├── 📄 coliseuVistaEmCima1.jpg.meta
 │   │   │   │   │   ├── 🖼️ coliseuVistaEmCima2.jpg
 │   │   │   │   │   └── 📄 coliseuVistaEmCima2.jpg.meta
-│   │   │   │   ├── 📁 Lab16
-│   │   │   │   │   ├── 📄 Lab1601.mat
-│   │   │   │   │   ├── 📄 Lab1601.mat.meta
-│   │   │   │   │   ├── 📄 Lab1602.mat
-│   │   │   │   │   ├── 📄 Lab1602.mat.meta
-│   │   │   │   │   ├── 🖼️ Output (1).JPG
-│   │   │   │   │   ├── 📄 Output (1).JPG.meta
-│   │   │   │   │   ├── 🖼️ Output.JPG
-│   │   │   │   │   └── 📄 Output.JPG.meta
 │   │   │   │   ├── 📁 MachuPicchu
 │   │   │   │   │   ├── 🖼️ Construcao.jpg
 │   │   │   │   │   ├── 📄 Construcao.jpg.meta
@@ -1316,9 +1046,6 @@
 │   │   │   │   │   ├── 📄 VistaMontanha4.jpg.meta
 │   │   │   │   │   ├── 🖼️ VistaMontanha5.jpg
 │   │   │   │   │   └── 📄 VistaMontanha5.jpg.meta
-│   │   │   │   ├── 📁 Materials
-│   │   │   │   │   ├── 📄 360_0115.mat
-│   │   │   │   │   └── 📄 360_0115.mat.meta
 │   │   │   │   ├── 📁 MuseuFlorenca
 │   │   │   │   │   ├── 🖼️ Interior.jpg
 │   │   │   │   │   ├── 📄 Interior.jpg.meta
@@ -1396,54 +1123,8 @@
 │   │   │   │   │   ├── 📄 MuseuLouvre04.mat.meta
 │   │   │   │   │   ├── 📄 MuseuLouvre05.mat
 │   │   │   │   │   └── 📄 MuseuLouvre05.mat.meta
-│   │   │   │   ├── 📁 MuseuLouvre 1
-│   │   │   │   │   ├── 🖼️ Exterior.jpg
-│   │   │   │   │   ├── 📄 Exterior.jpg.meta
-│   │   │   │   │   ├── 🖼️ Exterior2.jpg
-│   │   │   │   │   ├── 📄 Exterior2.jpg.meta
-│   │   │   │   │   ├── 🖼️ Interior.jpg
-│   │   │   │   │   ├── 📄 Interior.jpg.meta
-│   │   │   │   │   ├── 🖼️ Interior2.jpg
-│   │   │   │   │   ├── 📄 Interior2.jpg.meta
-│   │   │   │   │   ├── 🖼️ Interior3.jpg
-│   │   │   │   │   ├── 📄 Interior3.jpg.meta
-│   │   │   │   │   ├── 🖼️ Interior4.jpg
-│   │   │   │   │   ├── 📄 Interior4.jpg.meta
-│   │   │   │   │   ├── 🖼️ Interior5.jpg
-│   │   │   │   │   ├── 📄 Interior5.jpg.meta
-│   │   │   │   │   ├── 🖼️ Interior7.jpg
-│   │   │   │   │   ├── 📄 Interior7.jpg.meta
-│   │   │   │   │   ├── 🖼️ Interior8.jpg
-│   │   │   │   │   ├── 📄 Interior8.jpg.meta
-│   │   │   │   │   ├── 📄 MuseuLouvre01.mat
-│   │   │   │   │   ├── 📄 MuseuLouvre01.mat.meta
-│   │   │   │   │   ├── 📄 MuseuLouvre02.mat
-│   │   │   │   │   ├── 📄 MuseuLouvre02.mat.meta
-│   │   │   │   │   ├── 📄 MuseuLouvre03.mat
-│   │   │   │   │   ├── 📄 MuseuLouvre03.mat.meta
-│   │   │   │   │   ├── 📄 MuseuLouvre04.mat
-│   │   │   │   │   ├── 📄 MuseuLouvre04.mat.meta
-│   │   │   │   │   ├── 📄 MuseuLouvre05.mat
-│   │   │   │   │   └── 📄 MuseuLouvre05.mat.meta
-│   │   │   │   ├── 📁 Piramides
-│   │   │   │   │   ├── 🖼️ EsfingeLonge.jpg
-│   │   │   │   │   ├── 📄 EsfingeLonge.jpg.meta
-│   │   │   │   │   ├── 🖼️ EsfingePerto.jpg
-│   │   │   │   │   ├── 📄 EsfingePerto.jpg.meta
-│   │   │   │   │   ├── 🖼️ Las3Grandes.jpg
-│   │   │   │   │   ├── 📄 Las3Grandes.jpg.meta
-│   │   │   │   │   ├── 🖼️ MeioDoCaminho.jpg
-│   │   │   │   │   ├── 📄 MeioDoCaminho.jpg.meta
-│   │   │   │   │   ├── 🖼️ Piramide.jpg
-│   │   │   │   │   ├── 📄 Piramide.jpg.meta
-│   │   │   │   │   ├── 🖼️ Piramides2.jpg
-│   │   │   │   │   └── 📄 Piramides2.jpg.meta
-│   │   │   │   ├── 🖼️ 360_0115.JPG
-│   │   │   │   ├── 📄 360_0115.JPG.meta
 │   │   │   │   ├── 📄 Acropole.meta
-│   │   │   │   ├── 📄 Cafe.meta
 │   │   │   │   ├── 📄 Coliseu.meta
-│   │   │   │   ├── 📄 Lab16.meta
 │   │   │   │   ├── 📄 Lobby.mat
 │   │   │   │   ├── 📄 Lobby.mat.meta
 │   │   │   │   ├── 📄 M_Menu_Skybox.mat
@@ -1451,17 +1132,19 @@
 │   │   │   │   ├── 📄 M_PlataformaPreta.mat
 │   │   │   │   ├── 📄 M_PlataformaPreta.mat.meta
 │   │   │   │   ├── 📄 MachuPicchu.meta
-│   │   │   │   ├── 📄 Materials.meta
 │   │   │   │   ├── 📄 MuseuFlorenca.meta
 │   │   │   │   ├── 📄 MuseuIpiranga.meta
-│   │   │   │   ├── 📄 MuseuLouvre 1.meta
 │   │   │   │   ├── 📄 MuseuLouvre.meta
-│   │   │   │   ├── 📄 Piramides.meta
 │   │   │   │   ├── 📄 ShaderLobby.shader
 │   │   │   │   ├── 📄 ShaderLobby.shader.meta
 │   │   │   │   ├── 🖼️ imagemgpia.png
 │   │   │   │   └── 📄 imagemgpia.png.meta
 │   │   │   ├── 📁 UI
+│   │   │   │   ├── 📁 Background
+│   │   │   │   │   ├── 📄 FS002_Night.mat
+│   │   │   │   │   ├── 📄 FS002_Night.mat.meta
+│   │   │   │   │   ├── 🖼️ FS002_Night.png
+│   │   │   │   │   └── 📄 FS002_Night.png.meta
 │   │   │   │   ├── 📁 Mapas
 │   │   │   │   │   ├── 🖼️ mapa_Ipiranga.png
 │   │   │   │   │   ├── 📄 mapa_Ipiranga.png.meta
@@ -1479,10 +1162,13 @@
 │   │   │   │   │   ├── 📄 mapa_louvre.png.meta
 │   │   │   │   │   ├── 🖼️ mapa_machupicchu.png
 │   │   │   │   │   └── 📄 mapa_machupicchu.png.meta
+│   │   │   │   ├── 📄 Background.meta
 │   │   │   │   └── 📄 Mapas.meta
+│   │   │   ├── 📁 Video
 │   │   │   ├── 📄 Audio.meta
 │   │   │   ├── 📄 Materials.meta
-│   │   │   └── 📄 UI.meta
+│   │   │   ├── 📄 UI.meta
+│   │   │   └── 📄 Video.meta
 │   │   ├── 📁 Scenes
 │   │   │   ├── 📄 LobbyScene.unity
 │   │   │   ├── 📄 LobbyScene.unity.meta
@@ -1536,11 +1222,10 @@
 │   ├── 📄 Config_Quest_Renderer.asset.meta
 │   ├── 📄 DefaultVolumeProfile.asset
 │   ├── 📄 DefaultVolumeProfile.asset.meta
-│   ├── 📄 Fantasy Skybox FREE.meta
 │   ├── 📄 InvertNormals.shader
 │   ├── 📄 InvertNormals.shader.meta
-│   ├── 📄 M_MenuCube_Inside.mat
-│   ├── 📄 M_MenuCube_Inside.mat.meta
+│   ├── 📄 M_MenuCube_Inside 1.mat
+│   ├── 📄 M_MenuCube_Inside 1.mat.meta
 │   ├── 📄 PanoramaUnlit_URP.shader
 │   ├── 📄 PanoramaUnlit_URP.shader.meta
 │   ├── 📄 Samples.meta
@@ -1550,44 +1235,7 @@
 │   ├── 📄 UniversalRenderPipelineGlobalSettings.asset.meta
 │   ├── 📄 XR.meta
 │   ├── 📄 XRI.meta
-│   └── 📄 _Recovery.meta
-├── 📁 Packages
-│   ├── ⚙️ manifest.json
-│   └── ⚙️ packages-lock.json
-├── 📁 ProjectSettings
-│   ├── 📄 AudioManager.asset
-│   ├── 📄 ClusterInputManager.asset
-│   ├── 📄 DynamicsManager.asset
-│   ├── 📄 EditorBuildSettings.asset
-│   ├── 📄 EditorSettings.asset
-│   ├── 📄 GraphicsSettings.asset
-│   ├── 📄 InputManager.asset
-│   ├── 📄 MemorySettings.asset
-│   ├── 📄 MultiplayerManager.asset
-│   ├── 📄 NavMeshAreas.asset
-│   ├── 📄 PackageManagerSettings.asset
-│   ├── 📄 Physics2DSettings.asset
-│   ├── 📄 PresetManager.asset
-│   ├── 📄 ProjectSettings.asset
-│   ├── 📄 ProjectVersion.txt
-│   ├── 📄 QualitySettings.asset
-│   ├── ⚙️ SceneTemplateSettings.json
-│   ├── 📄 ShaderGraphSettings.asset
-│   ├── 📄 TagManager.asset
-│   ├── 📄 TimeManager.asset
-│   ├── 📄 URPProjectSettings.asset
-│   ├── 📄 UnityConnectSettings.asset
-│   ├── 📄 VFXManager.asset
-│   ├── 📄 VersionControlSettings.asset
-│   ├── 📄 VisualScriptingSettings.asset
-│   ├── 📄 XRPackageSettings.asset
-│   └── 📄 XRSettings.asset
-├── 📁 Versoes
-├── ⚙️ .gitattributes
-├── ⚙️ .gitignore
-├── 📝 README.md
-├── 📝 arquitetura.md
-```
-
----
-*Generated by FileTree Pro Extension*
+│   ├── 📄 _Project.meta
+│   ├── 📄 _Recovery.meta
+│   ├── 📄 fade.mat
+│   └── 📄 fade.mat.meta
